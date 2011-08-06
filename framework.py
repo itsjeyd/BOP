@@ -13,6 +13,9 @@ class Chart:
     def get_edge(self, i, j):
         pass
 
+    def get_edges_starting_at(self, i):
+        pass
+
 
 class Edge:
 
@@ -21,7 +24,7 @@ class Edge:
     prob = -1.0
     prod_rule = None # Object of type ProductionRule
     dot = -1
-    # complete = False
+    complete = False
     # subtrees = [] # List of immediate daughters of type Edge
 
     def __init__(self, start, end, prod_rule, dot, known_dtrs):
@@ -45,7 +48,14 @@ class Edge:
     def calc_prob(self, prod_rule, known_dtrs):
         pass # called by __init__
 
-    # Methods for complete
+    def is_complete(self):
+        return self.complete
+
+    def set_complete(self):
+        pass
+
+    def get_daughters(self):
+        pass
 
     # Methods for subtrees
 
@@ -68,15 +78,24 @@ class ProductionRule:
     rhs = []
     prob = -1.0
 
-    def get_lhs(self): return self.lhs
+    
+    def __init__(self, lhs, rhs, prob):
+        pass
 
-    def get_rhs(self): return self.rhs
+    def get_lhs(self):
+        return self.lhs
 
-    def get_rhs_element(self, index): return self.rhs[index]
+    def get_rhs(self):
+        return self.rhs
 
-    def get_rhs_length(self): return len(self.rhs)
+    def get_rhs_element(self, index):
+        return self.rhs[index]
 
-    def get_prob(self): return self.prob
+    def get_rhs_length(self):
+        return len(self.rhs)
+
+    def get_prob(self):
+        return self.prob
     
 
 class BottomUpChartParser:
@@ -99,6 +118,9 @@ class BottomUpChartParser:
         '''
         pass
 
+    def tokenize(self, sentence):
+        return sentence.split()
+
     def init_rule(self, token, pos):
         pass # pos = start of Edge
 
@@ -106,6 +128,9 @@ class BottomUpChartParser:
         pass
 
     def fundamental_rule(self, incomplete_edge):
+        pass
+
+    def generate_parses(self):
         pass
 
 
@@ -118,6 +143,12 @@ class Grammar:
         pass # calls load
 
     def load(self):
+        pass
+
+    def get_possible_parent_rules(self, token):
+        ''' Returns list of production rules whose
+            first RHS element is the given token
+        '''
         pass
     
 
