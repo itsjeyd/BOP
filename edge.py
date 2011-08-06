@@ -46,4 +46,7 @@ class Edge:
         if self.dot == self.prod_rule.get_rhs_length():
             self.complete = True
 
+    def get_daughters(self):
+        pass
+    
     # Methods for subtrees

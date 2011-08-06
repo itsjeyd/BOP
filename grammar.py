@@ -10,3 +10,9 @@ class Grammar:
 
     def load(self):
         pass
+    
+    def get_possible_parent_rules(self, token):
+        ''' Returns list of production rules whose
+            first RHS element is the given token
+        '''
+        pass

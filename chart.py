@@ -12,3 +12,6 @@ class Chart:
 
     def get_edge(self, i, j):
         pass
+    
+    def get_edges_starting_at(self, i):
+        pass
