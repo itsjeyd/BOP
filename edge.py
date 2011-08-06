@@ -43,7 +43,7 @@ class Edge:
         return self.complete
 
     def set_complete(self):
-        if self.dot == len(self.prod_rule.get_rhs()):
+        if self.dot == self.prod_rule.get_rhs_length():
             self.complete = True
 
     # Methods for subtrees
