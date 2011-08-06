@@ -7,12 +7,17 @@ class Edge:
     prob = -1.0
     prod_rule = None # Object of type ProductionRule
     dot = -1
-    # complete = False
+    complete = False
     # subtrees = [] # List of immediate daughters of type Edge
 
     def __init__(self, start, end, prod_rule, dot, known_dtrs):
-        pass
-
+        self.start = start
+        self.end = end
+        self.prod_rule = prod_rule
+        self.dot = dot
+        self.prob = self.calc_prob(known_dtrs)
+        self.set_complete()
+    
     def get_start(self):
         return self.start
 
@@ -28,9 +33,17 @@ class Edge:
     def get_dot(self):
         return self.dot
 
-    def calc_prob(self, prod_rule, known_dtrs):
-        pass # called by __init__
+    def calc_prob(self, known_dtrs):
+        prob = self.prod_rule.get_prob()
+        for dtr in known_dtrs:
+            prob *= dtr.get_prob()
+        return prob
+    
+    def is_complete(self):
+        return self.complete
 
-    # Methods for complete
+    def set_complete(self):
+        if self.dot == len(self.prod_rule.get_rhs()):
+            self.complete = True
 
     # Methods for subtrees
