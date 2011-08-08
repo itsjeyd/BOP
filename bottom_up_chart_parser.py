@@ -53,11 +53,11 @@ class BottomUpChartParser:
             pos += 1
             edge = self.init_rule(token, pos)
             self.queue.add_element(edge)
-        pass # pos = start of Edge
 
     def predict_rule(self, complete_edge):
-        ''' Input: Complete edge
-            Push to queue: List of incomplete edges (or empty list)
+        '''
+        Input: Complete edge
+        Push to queue: List of incomplete edges (or empty list)
         '''
         start = complete_edge.get_start()
         lhs = complete_edge.get_prod_rule().get_lhs()
@@ -68,8 +68,9 @@ class BottomUpChartParser:
             self.queue.add_element(incomplete_edge)
 
     def fundamental_rule(self, incomplete_edge):
-        ''' Input: Incomplete edge
-            Push to queue: List of edges (both complete and incomplete) or empty list
+        '''
+        Input: Incomplete edge
+        Push to queue: List of edges (both complete and incomplete) or empty list
         '''
         ''' *** Incomplete Edge *** '''
         i = incomplete_edge.get_start()
@@ -98,7 +99,7 @@ class BottomUpChartParser:
                                 Start: j
                                 End: k
                                 Complete: True 
-            We create: edge(i,k)'''
+            We create: edge(i,k) '''
     
     def generate_parses(self):
         pass
