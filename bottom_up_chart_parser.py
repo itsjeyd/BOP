@@ -29,7 +29,7 @@ class BottomUpChartParser:
         enough_parses_found = False
         while not self.queue.is_empty() and not enough_parses_found:
             ''' Push queue element to chart '''
-            edge = self.queue.get_next_element()
+            edge = self.queue.get_next_edge()
             self.chart.add_edge(edge)
             
             if edge.is_complete():
@@ -52,7 +52,7 @@ class BottomUpChartParser:
         for token in tokens:
             pos += 1
             edge = self.init_rule(token, pos)
-            self.queue.add_element(edge)
+            self.queue.add_edge(edge)
 
     def predict_rule(self, complete_edge):
         '''
@@ -65,7 +65,7 @@ class BottomUpChartParser:
         
         for parent in parents:
             incomplete_edge = Edge(start, start, parent, 0, None)
-            self.queue.add_element(incomplete_edge)
+            self.queue.add_edge(incomplete_edge)
 
     def fundamental_rule(self, incomplete_edge):
         '''
@@ -89,7 +89,7 @@ class BottomUpChartParser:
                 ''' *** New Edge *** '''
                 k = comp_edge.get_end()
                 new_edge = Edge(i, k, prod_rule, dot+1, known_dtrs+comp_edge)
-                self.queue.add_element(new_edge)
+                self.queue.add_edge(new_edge)
         
         ''' We have: start: i
                      end: j

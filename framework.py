@@ -73,6 +73,9 @@ class Queue:
     def add_edge(self):
         pass
 
+    def is_empty(self):
+        pass
+
 
 class ProductionRule:
 
