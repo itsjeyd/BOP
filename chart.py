@@ -7,20 +7,14 @@ class Chart:
     chart = None
     
     def __init__(self, size):
-        self.chart = [[None for col in range(size)] for row in range(size)]
+        self.chart = [[[] for col in range(size)] for row in range(size)]
 
     def add_edge(self, edge):
         '''
-        Since all cells in the chart are initialized as None, we can't
-        just append the edge to the appropriate cell. Instead, we need
-        to first check whether or not the cell already contains one or
-        more edges. If it does, we simply append; if it does not, we
-        replace it with a list containing the new edge as the only
-        element.
+        Adds a newly created edge to the appropriate cell of the
+        chart.
         '''
-        i, j = edge.get_start(), edge.get_end()
-        self.chart[i][j] = [edge] if self.chart[i][j] == None \
-            else self.chart[i][j].append(edge)
+        self.chart[edge.get_start()][edge.get_end()].append(edge)
 
     def get_edges(self, i, j):
         '''
