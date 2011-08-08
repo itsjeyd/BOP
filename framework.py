@@ -62,15 +62,17 @@ class Edge:
 
 class Queue:
 
-    def get_next_element(self):
+    queue = None
+
+    def __init__(self):
+        # initialize self.queue as empty list
+
+    def get_next_edge(self):
         pass
 
-    def add_element(self):
+    def add_edge(self):
         pass
-    
 
-class FIFOQueue(Queue):
-    pass
 
 class ProductionRule:
 
