@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 from chart import Chart
 from queue import Queue
 from edge import Edge
