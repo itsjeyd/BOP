@@ -10,7 +10,7 @@ class Chart:
     def add_edge(self, edge):
         pass
 
-    def get_edge(self, i, j):
+    def get_edges(self, i, j):
         pass
 
     def get_edges_starting_at(self, i):
