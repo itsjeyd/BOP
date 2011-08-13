@@ -126,6 +126,13 @@ class BottomUpChartParser:
     def tokenize(self, sentence):
         return sentence.split()
 
+    def sentence_contains_unknown_words(self, tokens):
+        '''
+        Returns True if the current sentence contains unknown words,
+        else False
+        '''
+        pass
+
     def init_rule(self, token, pos):
         pass # pos = start of Edge
 
@@ -148,6 +155,36 @@ class Grammar:
         pass # calls load
 
     def load(self):
+        pass
+
+    def extract_rules(self, line):
+        pass
+
+    def extact_lhs(self, line):
+        pass
+
+    def extract_rhses(self, line):
+        pass
+
+    def seperate_dtrs(self, rhs):
+        pass
+
+    def extract_prob(self, line):
+        pass
+
+    def generate_prod_rule(self, lhs, rhs, prob):
+        pass
+
+    def add_to_rules(self, prod_rule):
+        pass
+
+    def build_lexicon(self):
+        pass
+
+    def standardize_rules(self):
+        pass
+
+    def get_lexicon(self):
         pass
 
     def get_possible_parent_rules(self, token):

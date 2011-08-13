@@ -3,6 +3,7 @@
 from chart import Chart
 from queue import Queue
 from edge import Edge
+from grammar import Grammar
 
 class BottomUpChartParser:
 
@@ -11,11 +12,17 @@ class BottomUpChartParser:
     chart = None
 
     def __init__(self, grammar):
-        self.grammar = grammar
+        self.grammar = Grammar(grammar)
 
     def parse(self, sentence):        
         ''' Tokenize given sentence '''
         tokens = self.tokenize(sentence)
+
+        ''' Check lexicon for words in sentence '''
+        self.sentence_contains_unknown_words(tokens) # This needs to
+                                                     # somehow stop
+                                                     # the parsing
+                                                     # process!
         
         ''' 1) Initialize empty chart and queue '''
         n = len(tokens)
@@ -46,6 +53,11 @@ class BottomUpChartParser:
     def tokenize(self, sentence):
         ''' Separate sentence into list of tokens '''
         return sentence.split()
+    
+    def sentence_contains_unknown_words(self, tokens):
+        lexicon = self.grammar.get_lexicon()
+        unknown_words = [token for token in tokens if token not in lexicon]
+        return True if unknown_words else False
 
     def init_rule(self, tokens):
         pos = -1
