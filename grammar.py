@@ -40,7 +40,7 @@ class Grammar:
         return [dtr for dtr in dtrs.split()]
 
     def extract_prob(self, rhs):
-        return re.split('[\[\]]', rhs)[1]
+        return float(re.split('[\[\]]', rhs)[1])
 
     def generate_prod_rule(self, lhs, rhs, prob):
         '''
@@ -61,9 +61,16 @@ class Grammar:
                             if key.startswith('\'') or key.startswith('\"')]
         
     def standardize_rules(self):
-        for key in self.rules.keys():
-            if key.startswith('\'') or key.startswith('\"'):
-                self.rules[key.strip('\'').strip('\"')] = self.rules.pop(key)
+        for rhs, prod_rules in self.rules.items():
+            if rhs.startswith('\'') or rhs.startswith('\"'):
+                stripped_rhs = rhs.strip('\'').strip('\"')
+                self.rules[stripped_rhs] = self.rules.pop(rhs)
+                for prod_rule in prod_rules:
+                    prod_rule.rhs = [stripped_rhs] # Setter method for
+                                                   # RHS
+                                                   # ProductionRule
+                                                   # instance would be
+                                                   # cleaner?
             else:
                 pass
         
@@ -75,5 +82,9 @@ class Grammar:
         Returns list of production rules whose
         first RHS element is the given token
         '''
-        parents = self.rules[token]
         return self.rules[token]
+
+    def print_rules(self):
+        for prod_rules in self.rules.values():
+            for prod_rule in prod_rules:
+                prod_rule.print_prod_rule()

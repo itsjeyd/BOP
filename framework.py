@@ -101,6 +101,12 @@ class ProductionRule:
 
     def get_prob(self):
         return self.prob
+
+    def print_prod_rule(self):
+        pass # calls self.format_rhs()
+
+    def format_rhs(self):
+        pass
     
 
 class BottomUpChartParser:
@@ -191,6 +197,9 @@ class Grammar:
         ''' Returns list of production rules whose
             first RHS element is the given token
         '''
+        pass
+
+    def print_rules(self):
         pass
     
 

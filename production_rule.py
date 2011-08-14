@@ -25,3 +25,11 @@ class ProductionRule:
 
     def get_prob(self):
         return self.prob
+
+    def print_prod_rule(self):
+        print self.lhs + ' ---> ' \
+            + self.format_rhs() \
+            + ' [' + str(self.prob) + ']'
+
+    def format_rhs(self):
+        return self.rhs[0] if len(self.rhs) == 1 else ' '.join(self.rhs)
