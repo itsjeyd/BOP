@@ -157,10 +157,13 @@ class Grammar:
     rules = None # Dictionary: First element on RHS (key), list of
                  # associated production rules (value)
 
-    def __init__(self, file):
+    def __init__(self, grammar):
         pass # calls load
 
-    def load(self):
+    def load(self, grammar):
+        pass
+
+    def build_rules(self, grammar):
         pass
 
     def extract_rules(self, line):
@@ -187,7 +190,7 @@ class Grammar:
     def build_lexicon(self):
         pass
 
-    def standardize_rules(self):
+    def remove_quotation_marks(self):
         pass
 
     def get_lexicon(self):
