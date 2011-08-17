@@ -6,3 +6,9 @@ TODO -- next steps:
 - Grammatik finden (Anna, Tim)
 - Recherche: Parses generieren (Marc)
 - Parser zum Laufen bringen und ggf. bisherigen Code anpassen: (alle)
+
+QUESTIONS:
+- Where would we specify how many parses should be returned? Parameter for parse method? 
+
+REMARKS:
+- Erster Satz des Kommentars sollte eine Kurzbeschreibung der Methode sein, deren Lektüre ausreicht, um einem grob klarzumachen, wofür eine Methode ist. 

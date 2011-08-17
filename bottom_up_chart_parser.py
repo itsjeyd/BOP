@@ -4,70 +4,100 @@ from chart import Chart
 from queue import Queue
 from edge import Edge
 from grammar import Grammar
+from parse_exception import ParseException
 
 class BottomUpChartParser:
 
-    grammar = None
-    queue = None
-    chart = None
+    grammar = None  # Grammar object that includes lexicon and dictionary
+    queue = None    # Queue object on which new edges are stacked
+    chart = None    # Chart object in which edges are stored for the final parse generation
 
     def __init__(self, grammar):
         self.grammar = Grammar(grammar)
 
-    def parse(self, sentence):        
-        ''' Tokenize given sentence '''
+    def parse(self, sentence):
+        '''
+        Parses a given sentence.
+        This is the central method to be called from outside.
+        '''
+        ### Preprocessing ###
+        # Tokenize the given sentence
         tokens = self.tokenize(sentence)
 
-        ''' Check lexicon for words in sentence '''
-        self.sentence_contains_unknown_words(tokens) # This needs to
-                                                     # somehow stop
-                                                     # the parsing
-                                                     # process!
-        
-        ''' 1) Initialize empty chart and queue '''
+        # Check whether all tokens are contained in the lexicon
+        unknown_words = self.get_unknown_words(tokens)
+        if unknown_words:
+            # TODO: Run fallback solutions to fix unknown words, else raise exception
+            raise ParseException("Could not parse, due to the following unknown words: %s" % unknown_words)
+            
+        ### Main steps ###
+        # 1) Initialize empty chart and queue
         n = len(tokens)
         self.chart = Chart(n+1)
         self.queue = Queue()
         
-        ''' 2) Apply init_rule to each word in input sentence '''
+        # 2) Create initial edges for all tokens and push them to the queue
         self.init_rule(tokens)
         
-        ''' 3) Until no more edges are added '''
+        # 3) Repeat until no more edges are added:
         enough_parses_found = False
         while not self.queue.is_empty() and not enough_parses_found:
-            ''' Push queue element to chart '''
+            # Push next queue element to the chart
             edge = self.queue.get_next_edge()
             self.chart.add_edge(edge)
             
             if edge.is_complete():
-                ''' Apply predict_rule everywhere it applies (push to queue) '''
+                # Apply prediction rule wherever it applies and push to queue
                 self.predict_rule(edge)
             else:
-                ''' Apply fundamental rule everywhere it applies (push to queue)'''
+                # Apply fundamental rule wherever it applies and push to queue
                 self.fundamental_rule(edge)
         
-        '''4) Return parses'''
+        # 4) Return the generated parses
         return self.generate_parses()
         
     
     def tokenize(self, sentence):
-        ''' Separate sentence into list of tokens '''
+        ''' 
+        Separate a sentence into a list of tokens and return the list.
+        Currently this simply splits at each whitespace character with no 
+        special preprocessing
+        '''
         return sentence.split()
     
     def sentence_contains_unknown_words(self, tokens):
+        '''TODO: Legacy function. Will remove if no one misses it. '''
+        unknown_words = self.get_unknown_words(tokens)
+        return True if unknown_words else False
+    
+    def get_unknown_words(self, tokens):
         lexicon = self.grammar.get_lexicon()
         unknown_words = [token for token in tokens if token not in lexicon]
-        return True if unknown_words else False
+        return unknown_words
 
     def init_rule(self, tokens):
-        pos = -1
+        '''
+        Generates initial edges for all given tokens and adds them to the queue.
+        
+        Formal definition:
+            For every word w_i add the edge [w_i -> . , (i, i+1)]
+        '''
+        node = -1   # Position between tokens of sentence (0 is start of sentence)
         for token in tokens:
-            pos += 1
-            edge = self.init_rule(token, pos)
-            self.queue.add_edge(edge)
+            node += 1
+            rules = self.grammar.get_rules_via_lhs(token)
+            for rule in rules:
+                edge = Edge(node, node+1, rule, 0, [])
+                self.queue.add_edge(edge)
 
     def predict_rule(self, complete_edge):
         '''
+        
+        Formal definition: 
+            For each complete edge [A -> alpha ., (i, j)] 
+            and each production B -> A beta, 
+            add the self-loop edge [B -> . A beta , (i, i)]
+        
         Input: Complete edge
         Push to queue: List of incomplete edges (or empty list)
         '''
@@ -81,6 +111,12 @@ class BottomUpChartParser:
 
     def fundamental_rule(self, incomplete_edge):
         '''
+        
+        Formal definition:
+            If the chart contains the edges [A -> alpha . B beta, (i, j)] 
+            and [B -> gamma . , (j, k)] 
+            then add a new edge [A -> alpha B . beta, (i, k)].
+        
         Input: Incomplete edge
         Push to queue: List of edges (both complete and incomplete) or empty list
         '''
