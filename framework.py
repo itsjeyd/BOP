@@ -66,6 +66,7 @@ class Queue:
 
     def __init__(self):
         # initialize self.queue as empty list
+        pass
 
     def get_next_edge(self):
         pass
@@ -138,6 +139,9 @@ class BottomUpChartParser:
         else False
         '''
         pass
+    
+    def get_unknown_words(self, tokens):
+        pass
 
     def init_rule(self, token, pos):
         pass # pos = start of Edge
@@ -196,6 +200,9 @@ class Grammar:
     def get_lexicon(self):
         pass
 
+    def get_rules_via_lhs(self, token):
+        pass
+    
     def get_possible_parent_rules(self, token):
         ''' Returns list of production rules whose
             first RHS element is the given token
@@ -205,5 +212,12 @@ class Grammar:
     def print_rules(self):
         pass
     
+
+class parse_exception:
+    def __init__(self, value):
+        pass
+    
+    def __str__(self):
+        pass
 
 # class Main: pass

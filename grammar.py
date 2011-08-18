@@ -3,7 +3,6 @@
 import re
 from production_rule import ProductionRule
 
-
 class Grammar:
 
     lexicon = None   # Set; the parser uses this to quickly check the
@@ -24,6 +23,7 @@ class Grammar:
         self.build_lexicon()
         self.remove_quotation_marks()
 
+    ### Internal auxiliary methods ###
     def build_rules(self, grammar):
         '''
         This method populates the set of rules by extracting all
@@ -212,12 +212,22 @@ class Grammar:
             else:
                 pass
 
+
+    ### External methods ###
     def get_lexicon(self):
         '''
         Returns the lexicon
         '''
         return self.lexicon
 
+    def get_rules_via_lhs(self, token):
+        '''
+        Returns list of productions rules whose LHS element is the given token
+        '''
+        # TODO: Necessary for initial rules. How do we get them?
+
+
+    ## TODO: I suggest renaming this function to get_rules_via_rhs for clarity
     def get_possible_parent_rules(self, token):
         '''
         Returns list of production rules whose
