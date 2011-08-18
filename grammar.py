@@ -3,6 +3,7 @@
 import re
 from production_rule import ProductionRule
 
+
 class Grammar:
 
     lexicon = None   # Set; the parser uses this to quickly check the
@@ -22,7 +23,7 @@ class Grammar:
         self.build_rules(grammar)
         self.build_lexicon()
         self.remove_quotation_marks()
-    
+
     def build_rules(self, grammar):
         '''
         This method populates the set of rules by extracting all
@@ -67,7 +68,7 @@ class Grammar:
         extracted from the line as a whole
         '''
         return re.split(' *-> *', line)[0]
-    
+
     def extract_rhses(self, line):
         '''
         We allow a single line of the input grammar to look like this:
@@ -147,7 +148,7 @@ class Grammar:
         process, production rules are stored in a dictionary (by the
         first element on their RHS) instead of a plain list. This means
         that we can not simply append a given rule.
-        
+
         Instead, this method checks if the first element on the RHS of
         the given ProductionRule has already been added as a key to
         self.rules. If it has, it simply adds the rule to the
@@ -160,7 +161,7 @@ class Grammar:
             self.rules[first_rhs_element].append(prod_rule)
         else:
             self.rules[first_rhs_element] = [prod_rule]
-            
+
     def build_lexicon(self):
         '''
         Lines containing lexical items and POS information look like
@@ -174,7 +175,7 @@ class Grammar:
         means that before cleanup, lexical items are easily
         distinguishable from non-terminals in the set of RHS elements
         that make up the keys for self.rules.
-        
+
         This method makes use of this fact. It populates the lexicon
         with exactly those keys it recognizes as lexical items. Before
         adding each item it strips away all quotation marks, as they
@@ -183,7 +184,7 @@ class Grammar:
         self.lexicon = [key.strip('\'').strip('\"') for key \
                             in self.rules.keys() \
                             if key.startswith('\'') or key.startswith('\"')]
-        
+
     def remove_quotation_marks(self):
         '''
         Lines containing lexical items and POS information look like
@@ -193,7 +194,7 @@ class Grammar:
         CC  -> "and" [0.9] | "or" [0.1]
 
         When first building self.rules, quotation marks
-        surrounding the lexical items are *not* stripped away.        
+        surrounding the lexical items are *not* stripped away.
 
         This method removes all quotation marks. It should only be
         called *after* the lexicon has been built.
@@ -210,13 +211,13 @@ class Grammar:
                                                    # cleaner?
             else:
                 pass
-        
+
     def get_lexicon(self):
         '''
         Returns the lexicon
         '''
         return self.lexicon
-    
+
     def get_possible_parent_rules(self, token):
         '''
         Returns list of production rules whose
