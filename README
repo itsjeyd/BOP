@@ -11,4 +11,7 @@ QUESTIONS:
 - Where would we specify how many parses should be returned? Parameter for parse method? 
 
 REMARKS:
-- Erster Satz des Kommentars sollte eine Kurzbeschreibung der Methode sein, deren Lektüre ausreicht, um einem grob klarzumachen, wofür eine Methode ist. 
+- Erster Satz des Kommentars sollte eine Kurzbeschreibung der Methode sein, deren Lekt√ºre ausreicht, um einem grob klarzumachen, wof√ºr eine Methode ist.
+
+BUGS:
+- Parses are not completed. We only apply rules to i:i and i:i+1 steps.
