@@ -3,6 +3,7 @@
 from chart import Chart
 from queue import Queue
 from edge import Edge
+from production_rule import ProductionRule
 from grammar import Grammar
 from parse_exception import ParseException
 
@@ -85,10 +86,9 @@ class BottomUpChartParser:
         node = -1   # Position between tokens of sentence (0 is start of sentence)
         for token in tokens:
             node += 1
-            rules = self.grammar.get_rules_via_lhs(token)
-            for rule in rules:
-                edge = Edge(node, node+1, rule, 0, [])
-                self.queue.add_edge(edge)
+            rule = ProductionRule(token, [], 1.0)
+            edge = Edge(node, node+1, rule, 0, [])
+            self.queue.add_edge(edge)
 
     def predict_rule(self, complete_edge):
         '''
@@ -106,7 +106,7 @@ class BottomUpChartParser:
         parents = self.grammar.get_possible_parent_rules(lhs)
         
         for parent in parents:
-            incomplete_edge = Edge(start, start, parent, 0, None)
+            incomplete_edge = Edge(start, start, parent, 0, [])
             self.queue.add_edge(incomplete_edge)
 
     def fundamental_rule(self, incomplete_edge):
@@ -136,7 +136,8 @@ class BottomUpChartParser:
             if next_missing_daughter == comp_edge.get_prod_rule().get_lhs():
                 ''' *** New Edge *** '''
                 k = comp_edge.get_end()
-                new_edge = Edge(i, k, prod_rule, dot+1, known_dtrs+comp_edge)
+                new_dtrs = known_dtrs+[comp_edge]
+                new_edge = Edge(i, k, prod_rule, dot+1, new_dtrs)
                 self.queue.add_edge(new_edge)
         
         ''' We have: start: i

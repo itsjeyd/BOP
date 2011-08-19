@@ -66,6 +66,16 @@ class Edge:
             self.complete = True
 
     def get_daughters(self):
-        pass
+        '''
+        TODO: Dummy method.
+        '''
+        return []
+    
+    def __str__(self):
+        lhs = self.prod_rule.get_lhs()
+        rhs = self.prod_rule.get_rhs()[:]   # slicing creates a copy, allowing manipulation
+        rhs.insert(self.dot, ".")
+        rhs_string = " ".join(rhs)
+        return "%s = %s" % (lhs, rhs_string)
     
     # Methods for subtrees

@@ -220,14 +220,8 @@ class Grammar:
         '''
         return self.lexicon
 
-    def get_rules_via_lhs(self, token):
-        '''
-        Returns list of productions rules whose LHS element is the given token
-        '''
-        # TODO: Necessary for initial rules. How do we get them?
 
-
-    ## TODO: I suggest renaming this function to get_rules_via_rhs for clarity
+    ## TODO: I still don't like this function name
     def get_possible_parent_rules(self, token):
         '''
         Returns list of production rules whose

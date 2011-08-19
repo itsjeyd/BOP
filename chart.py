@@ -40,3 +40,20 @@ class Chart:
         for achieving this.
         '''
         return [edge for edge in itertools.chain(*self.chart[i])]
+    
+    def print_chart(self):
+        row = 0
+        for line in self.chart:
+            column = 0
+            for cell in line:
+                if len(cell) > 0:
+                    elems = []
+                    for elem in cell:
+                        elems.append(elem.__str__())
+                    cell_str = " | ".join(elems)
+                else:
+                    cell_str = ""
+                print "%i:%i = %s" % (row,column,cell_str)
+                column += 1
+            print "---------------"
+            row += 1
