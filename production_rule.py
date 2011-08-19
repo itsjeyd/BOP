@@ -33,3 +33,6 @@ class ProductionRule:
 
     def format_rhs(self):
         return self.rhs[0] if len(self.rhs) == 1 else ' '.join(self.rhs)
+    
+    def __str__(self):
+        return "%s = %s (%s)" % (self.lhs, " ".join(self.rhs), self.prob)

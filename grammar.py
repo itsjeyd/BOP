@@ -227,7 +227,10 @@ class Grammar:
         Returns list of production rules whose
         first RHS element is the given token
         '''
-        return self.rules[token]
+        if self.rules.has_key(token):
+            return self.rules[token]
+        else:
+            return []
 
     def print_rules(self):
         '''

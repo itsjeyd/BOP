@@ -76,6 +76,6 @@ class Edge:
         rhs = self.prod_rule.get_rhs()[:]   # slicing creates a copy, allowing manipulation
         rhs.insert(self.dot, ".")
         rhs_string = " ".join(rhs)
-        return "%s = %s" % (lhs, rhs_string)
+        return "%s = %s (%i:%i, %s)" % (lhs, rhs_string, self.start, self.end, self.prob)
     
     # Methods for subtrees

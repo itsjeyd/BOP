@@ -13,5 +13,4 @@ QUESTIONS:
 REMARKS:
 - Erster Satz des Kommentars sollte eine Kurzbeschreibung der Methode sein, deren Lektüre ausreicht, um einem grob klarzumachen, wofür eine Methode ist.
 
-BUGS:
-- Parses are not completed. We only apply rules to i:i and i:i+1 steps.
+KNOWN BUGS:

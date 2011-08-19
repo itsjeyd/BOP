@@ -41,6 +41,12 @@ class Chart:
         '''
         return [edge for edge in itertools.chain(*self.chart[i])]
     
+    def get_edges_ending_at(self, j):
+        edges = []
+        for row in self.chart:
+            edges.append(row[j])
+        return [edge for edge in itertools.chain(*edges)]
+    
     def print_chart(self):
         row = 0
         for line in self.chart:

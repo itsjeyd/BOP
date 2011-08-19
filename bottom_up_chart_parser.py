@@ -50,9 +50,11 @@ class BottomUpChartParser:
             if edge.is_complete():
                 # Apply prediction rule wherever it applies and push to queue
                 self.predict_rule(edge)
-            else:
-                # Apply fundamental rule wherever it applies and push to queue
-                self.fundamental_rule(edge)
+#            else:
+#                # Apply fundamental rule wherever it applies and push to queue
+#                self.fundamental_rule(edge)
+            # Apply fundamental rule wherever it applies and push to queue
+            self.fundamental_rule(edge)
         
         # 4) Return the generated parses
         return self.generate_parses()
@@ -92,53 +94,71 @@ class BottomUpChartParser:
 
     def predict_rule(self, complete_edge):
         '''
-        
-        Formal definition: 
-            For each complete edge [A -> alpha ., (i, j)] 
-            and each production B -> A beta, 
-            add the self-loop edge [B -> . A beta , (i, i)]
+        If a complete edge can be the first RHS element of a production rule,
+        create a self-loop edge with that rule.
         
         Input: Complete edge
-        Push to queue: List of incomplete edges (or empty list)
+        Push to queue: Incomplete edges (or none)
+        Formal definition: 
+            For each complete edge [A -> alpha ., (i, j)] 
+            and each production rule  B -> A beta, 
+            add the self-loop edge [B -> . A beta , (i, i)]
         '''
         start = complete_edge.get_start()
         lhs = complete_edge.get_prod_rule().get_lhs()
         parents = self.grammar.get_possible_parent_rules(lhs)
         
         for parent in parents:
-            incomplete_edge = Edge(start, start, parent, 0, [])
-            self.queue.add_edge(incomplete_edge)
+            new_edge = Edge(start, start, parent, 0, [])
+            print "Predict rule: [%s] + [%s] = [%s]" % (complete_edge, parent, new_edge)
+            self.queue.add_edge(new_edge)
 
-    def fundamental_rule(self, incomplete_edge):
+    def fundamental_rule(self, input_edge):
         '''
+        If an incomplete edge can be advanced by a complete edge,
+        create a new edge with the advanced dot.
         
+        Input: Complete or incomplete edge
+        Push to queue: Complete and incomplete edges (or none)
         Formal definition:
             If the chart contains the edges [A -> alpha . B beta, (i, j)] 
             and [B -> gamma . , (j, k)] 
             then add a new edge [A -> alpha B . beta, (i, k)].
-        
-        Input: Incomplete edge
-        Push to queue: List of edges (both complete and incomplete) or empty list
         '''
-        ''' *** Incomplete Edge *** '''
-        i = incomplete_edge.get_start()
-        j = incomplete_edge.get_end()
-        dot = incomplete_edge.get_dot()
-        prod_rule = incomplete_edge.get_prod_rule()
-        known_dtrs = incomplete_edge.get_daughters()
-        ''' Get next RHS element after dot '''
-        next_missing_daughter = prod_rule.get_rhs_element(dot)
+        
+        # If the input edge is incomplete, find complete candidates to append to its end, 
+        # if its complete, find incomplete candidates to append to its start.
+        if input_edge.is_complete():
+            input_type = "B"
+            j = input_edge.get_start() # Input edge is B edge
+            incomplete_edges = [edge for edge in self.chart.get_edges_ending_at(j) if not edge.is_complete()]
+            complete_edges = [input_edge]
+        else:
+            input_type = "A"
+            j = input_edge.get_end()
+            incomplete_edges = [input_edge] # Input edge is A edge
+            complete_edges = [edge for edge in self.chart.get_edges_starting_at(j) if edge.is_complete()]
         
         
-        ''' *** Complete Edges *** '''
-        complete_edges = [edge for edge in self.chart.get_edges_starting_at(j) if edge.is_complete()]
-        for comp_edge in complete_edges:
-            if next_missing_daughter == comp_edge.get_prod_rule().get_lhs():
-                ''' *** New Edge *** '''
-                k = comp_edge.get_end()
-                new_dtrs = known_dtrs+[comp_edge]
-                new_edge = Edge(i, k, prod_rule, dot+1, new_dtrs)
-                self.queue.add_edge(new_edge)
+        ''' *** New Edges *** '''
+        for incomp_edge in incomplete_edges:
+            # Prepare info from incomplete edge
+            i = incomp_edge.get_start()
+            dot = incomp_edge.get_dot()
+            prod_rule = incomp_edge.get_prod_rule()
+            known_dtrs = incomp_edge.get_daughters()
+            next_missing_daughter = prod_rule.get_rhs_element(dot) # Get next RHS element after dot
+            
+            for comp_edge in complete_edges:
+                if next_missing_daughter == comp_edge.get_prod_rule().get_lhs():
+                    # Prepare info from complete edge
+                    k = comp_edge.get_end()
+                    
+                    # Create new edge and add to queue
+                    new_dtrs = known_dtrs+[comp_edge]
+                    new_edge = Edge(i, k, prod_rule, dot+1, new_dtrs)
+                    print "Fundamental rule %s: [%s] + [%s] = [%s]" % (input_type, incomp_edge, comp_edge, new_edge)
+                    self.queue.add_edge(new_edge)
         
         ''' We have: start: i
                      end: j
