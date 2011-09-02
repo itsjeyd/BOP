@@ -199,8 +199,8 @@ class Grammar:
 
     def get_lexicon(self):
         pass
-
-    def get_rules_via_lhs(self, token):
+    
+    def get_start_symbol(self):
         pass
     
     def get_possible_parent_rules(self, token):

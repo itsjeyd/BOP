@@ -47,6 +47,7 @@ class Chart:
             edges.append(row[j])
         return [edge for edge in itertools.chain(*edges)]
     
+    
     def print_chart(self):
         row = 0
         for line in self.chart:

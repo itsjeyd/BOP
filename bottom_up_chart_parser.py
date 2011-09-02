@@ -50,14 +50,14 @@ class BottomUpChartParser:
             if edge.is_complete():
                 # Apply prediction rule wherever it applies and push to queue
                 self.predict_rule(edge)
-#            else:
-#                # Apply fundamental rule wherever it applies and push to queue
-#                self.fundamental_rule(edge)
+            #else:
+                # Apply fundamental rule wherever it applies and push to queue
+                #self.fundamental_rule(edge)
             # Apply fundamental rule wherever it applies and push to queue
             self.fundamental_rule(edge)
         
         # 4) Return the generated parses
-        return self.generate_parses()
+#        return self.generate_parses()
         
     
     def tokenize(self, sentence):
@@ -170,5 +170,48 @@ class BottomUpChartParser:
                                 Complete: True 
             We create: edge(i,k) '''
     
-    def generate_parses(self):
+    def generate_parses(self, nbest=0):
+        '''
+        Returns a list of strings, representing possible parses, sorted by likelihood.
+        The optional nbest parameter determines how many parses are returned.
+        The default is nbest=0, which returns all parses.  
+        '''
+        
+        # Get all potential starting edges for the full sentence width
+        n = len(self.chart.chart)
+        start_symbol = self.grammar.get_start_symbol()
+        edges = self.chart.get_edges(0, n)
+        start_edges = [edge for edge in edges if (start_symbol == edge.get_prod_rule().get_lhs() and edge.is_complete())] # only use compete edges that can start a sentence
+        # For each starting edge, get all parses for all rhs elements
+        for start_edge in start_edges:
+            rhs_stack = start_edge.get_prod_rule().get_rhs()[:] # slicing creates a copy, allowing manipulation
+            while len(rhs_stack) > 0:
+                lhs = rhs_stack.pop()
+                start = 0
+                max_end = n - len(rhs_stack) # assumes that each element has at least length of 1. Thus, search can be narrowed down
+                self.get_parse_level(lhs, start, max_end)
+        pass
+    
+    def get_parse_level(self, lhs, start, max_end):
+        min_end = start + 1
+        for end in range(min_end, max_end+1):
+            all_edges = self.chart.get_edges(start, end)
+            edges = [edge for edge in all_edges if (lhs == edge.get_prod_rule().get_lhs() and edge.is_complete())] # only use compete edges that can start a sentence
+            for edge in edges:  # all candidates for the required lhs
+                rhs_stack = edge.get_prod_rule().get_rhs()[:] # slicing creates a copy, allowing manipulation
+                elem_start = start
+                parses = {}
+                intermediate_parses = {}
+                
+                while len(rhs_stack) > 0:
+                    elem = rhs_stack.pop()
+                    elem_end = end - len(rhs_stack) # assumes that each element has at least length of 1. Thus, search can be narrowed down
+                    elem_parses = self.get_parse_level(elem, elem_start, elem_end)
+                    
+                    if len(intermediate_parses) > 0:
+                        pass
+                    else:
+                        intermediate_parses = elem_parses
+                
+                return parses
         pass

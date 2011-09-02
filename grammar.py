@@ -231,6 +231,9 @@ class Grammar:
             return self.rules[token]
         else:
             return []
+    
+    def get_start_symbol(self):
+        return "S"
 
     def print_rules(self):
         '''
