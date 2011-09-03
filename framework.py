@@ -3,8 +3,12 @@
 class Chart:
 
     chart = []
-    
+    size = 0
+
     def __init__(self, size):
+        pass
+
+    def get_size(self):
         pass
 
     def add_edge(self, edge):
@@ -16,6 +20,12 @@ class Chart:
     def get_edges_starting_at(self, i):
         pass
 
+    def get_edges_ending_at(self, j):
+        pass
+
+    def print_chart(self):
+        pass
+
 
 class Edge:
 
@@ -25,7 +35,7 @@ class Edge:
     prod_rule = None # Object of type ProductionRule
     dot = -1
     complete = False
-    # subtrees = [] # List of immediate daughters of type Edge
+    known_dtrs = None # List of immediate daughters of type Edge
 
     def __init__(self, start, end, prod_rule, dot, known_dtrs):
         pass
@@ -54,10 +64,11 @@ class Edge:
     def set_complete(self):
         pass
 
-    def get_daughters(self):
+    def get_known_dtrs(self):
         pass
 
-    # Methods for subtrees
+    def __str__(self):
+        pass
 
 
 class Queue:
@@ -84,7 +95,7 @@ class ProductionRule:
     rhs = []
     prob = -1.0
 
-    
+
     def __init__(self, lhs, rhs, prob):
         pass
 
@@ -108,7 +119,7 @@ class ProductionRule:
 
     def format_rhs(self):
         pass
-    
+
 
 class BottomUpChartParser:
 
@@ -126,7 +137,7 @@ class BottomUpChartParser:
         3) Until no more edges are added:
         - Apply predict_rule everywhere it applies (push to queue)
         - Apply fundamental rule everywhere it applies (push to queue)
-        4) Return parses
+        4) Display parses
         '''
         pass
 
@@ -139,7 +150,7 @@ class BottomUpChartParser:
         else False
         '''
         pass
-    
+
     def get_unknown_words(self, tokens):
         pass
 
@@ -152,7 +163,13 @@ class BottomUpChartParser:
     def fundamental_rule(self, incomplete_edge):
         pass
 
-    def generate_parses(self):
+    def display_parses(self):
+        pass
+
+    def get_s_edges(self):
+        pass
+
+    def display_parse(self):
         pass
 
 
@@ -199,10 +216,10 @@ class Grammar:
 
     def get_lexicon(self):
         pass
-    
+
     def get_start_symbol(self):
         pass
-    
+
     def get_possible_parent_rules(self, token):
         ''' Returns list of production rules whose
             first RHS element is the given token
@@ -211,12 +228,12 @@ class Grammar:
 
     def print_rules(self):
         pass
-    
+
 
 class parse_exception:
     def __init__(self, value):
         pass
-    
+
     def __str__(self):
         pass
 
