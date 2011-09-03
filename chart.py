@@ -5,9 +5,14 @@ import itertools
 class Chart:
 
     chart = None
-    
+    size = 0
+
     def __init__(self, size):
         self.chart = [[[] for col in range(size)] for row in range(size)]
+        self.size = size
+
+    def get_size(self):
+        return self.size
 
     def add_edge(self, edge):
         '''
@@ -26,7 +31,7 @@ class Chart:
         that it returns a list of edges (and not just a single edge).
         '''
         return self.chart[i][j]
-    
+
     def get_edges_starting_at(self, i):
         '''
         The starting point of an edge is indicated by the row of the
@@ -40,14 +45,14 @@ class Chart:
         for achieving this.
         '''
         return [edge for edge in itertools.chain(*self.chart[i])]
-    
+
     def get_edges_ending_at(self, j):
         edges = []
         for row in self.chart:
             edges.append(row[j])
         return [edge for edge in itertools.chain(*edges)]
-    
-    
+
+
     def print_chart(self):
         row = 0
         for line in self.chart:
