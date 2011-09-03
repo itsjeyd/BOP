@@ -2,13 +2,13 @@
 
 class Edge:
 
-    start = -1       # Starting node of the edge
-    end = -1         # Ending node of the edge
-    prob = -1.0      # Probability of the edge
-    prod_rule = None # Object of type ProductionRule
-    dot = -1         # Position of the dot on the RHS
-    complete = False # Trigger shows whether dot is at end of RHS
-    # subtrees = [] # List of immediate daughters of type Edge
+    start = -1         # Starting node of the edge
+    end = -1           # Ending node of the edge
+    prob = -1.0        # Probability of the edge
+    prod_rule = None   # Object of type ProductionRule
+    dot = -1           # Position of the dot on the RHS
+    complete = False   # Trigger shows whether dot is at end of RHS
+    known_dtrs = None  # List of immediate daughters of type Edge
 
     def __init__(self, start, end, prod_rule, dot, known_dtrs):
         self.start = start
@@ -16,8 +16,9 @@ class Edge:
         self.prod_rule = prod_rule
         self.dot = dot
         self.prob = self.calc_prob(known_dtrs)
+        self.known_dtrs = known_dtrs
         self.set_complete()
-    
+
     def get_start(self):
         ''' Returns the starting node of the edge '''
         return self.start
@@ -49,7 +50,7 @@ class Edge:
         for dtr in known_dtrs:
             prob *= dtr.get_prob()
         return prob
-    
+
     def is_complete(self):
         '''
         Returns true iff the dot is at the end of the production rule,
@@ -59,23 +60,23 @@ class Edge:
 
     def set_complete(self):
         '''
-        Sets the completeness trigger to True if dot is at the end of the 
+        Sets the completeness trigger to True if dot is at the end of the
         right hand side and keeps it at False if it is not.
         '''
         if self.dot == self.prod_rule.get_rhs_length():
             self.complete = True
 
-    def get_daughters(self):
+    def get_known_dtrs(self):
         '''
-        TODO: Dummy method.
+        Return list of daughters that have already been found (through
+        application of fundamental rule)
         '''
-        return []
-    
+        return self.known_dtrs
+
     def __str__(self):
         lhs = self.prod_rule.get_lhs()
         rhs = self.prod_rule.get_rhs()[:]   # slicing creates a copy, allowing manipulation
         rhs.insert(self.dot, ".")
         rhs_string = " ".join(rhs)
         return "%s = %s (%i:%i, %s)" % (lhs, rhs_string, self.start, self.end, self.prob)
-    
-    # Methods for subtrees
+
