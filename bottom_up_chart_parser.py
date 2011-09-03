@@ -30,23 +30,23 @@ class BottomUpChartParser:
         if unknown_words:
             # TODO: Run fallback solutions to fix unknown words, else raise exception
             raise ParseException("Could not parse, due to the following unknown words: %s" % unknown_words)
-            
+
         ### Main steps ###
         # 1) Initialize empty chart and queue
         n = len(tokens)
         self.chart = Chart(n+1)
         self.queue = Queue()
-        
+
         # 2) Create initial edges for all tokens and push them to the queue
         self.init_rule(tokens)
-        
+
         # 3) Repeat until no more edges are added:
         enough_parses_found = False
         while not self.queue.is_empty() and not enough_parses_found:
             # Push next queue element to the chart
             edge = self.queue.get_next_edge()
             self.chart.add_edge(edge)
-            
+
             if edge.is_complete():
                 # Apply prediction rule wherever it applies and push to queue
                 self.predict_rule(edge)
@@ -55,24 +55,26 @@ class BottomUpChartParser:
                 #self.fundamental_rule(edge)
             # Apply fundamental rule wherever it applies and push to queue
             self.fundamental_rule(edge)
-        
-        # 4) Return the generated parses
-#        return self.generate_parses()
-        
-    
+
+        # 4) Display the generated parses
+        print '========================='
+        self.display_parses()
+        print '========================='
+
+
     def tokenize(self, sentence):
-        ''' 
+        '''
         Separate a sentence into a list of tokens and return the list.
-        Currently this simply splits at each whitespace character with no 
+        Currently this simply splits at each whitespace character with no
         special preprocessing
         '''
         return sentence.split()
-    
+
     def sentence_contains_unknown_words(self, tokens):
         '''TODO: Legacy function. Will remove if no one misses it. '''
         unknown_words = self.get_unknown_words(tokens)
         return True if unknown_words else False
-    
+
     def get_unknown_words(self, tokens):
         lexicon = self.grammar.get_lexicon()
         unknown_words = [token for token in tokens if token not in lexicon]
@@ -81,7 +83,7 @@ class BottomUpChartParser:
     def init_rule(self, tokens):
         '''
         Generates initial edges for all given tokens and adds them to the queue.
-        
+
         Formal definition:
             For every word w_i add the edge [w_i -> . , (i, i+1)]
         '''
@@ -94,20 +96,20 @@ class BottomUpChartParser:
 
     def predict_rule(self, complete_edge):
         '''
-        If a complete edge can be the first RHS element of a production rule,
-        create a self-loop edge with that rule.
-        
+        If the LHS of a complete edge can be the first RHS element of
+        a production rule, create a self-loop edge with that rule.
+
         Input: Complete edge
         Push to queue: Incomplete edges (or none)
-        Formal definition: 
-            For each complete edge [A -> alpha ., (i, j)] 
-            and each production rule  B -> A beta, 
+        Formal definition:
+            For each complete edge [A -> alpha ., (i, j)]
+            and each production rule  B -> A beta,
             add the self-loop edge [B -> . A beta , (i, i)]
         '''
         start = complete_edge.get_start()
         lhs = complete_edge.get_prod_rule().get_lhs()
         parents = self.grammar.get_possible_parent_rules(lhs)
-        
+
         for parent in parents:
             new_edge = Edge(start, start, parent, 0, [])
             print "Predict rule: [%s] + [%s] = [%s]" % (complete_edge, parent, new_edge)
@@ -117,16 +119,16 @@ class BottomUpChartParser:
         '''
         If an incomplete edge can be advanced by a complete edge,
         create a new edge with the advanced dot.
-        
+
         Input: Complete or incomplete edge
         Push to queue: Complete and incomplete edges (or none)
         Formal definition:
-            If the chart contains the edges [A -> alpha . B beta, (i, j)] 
-            and [B -> gamma . , (j, k)] 
+            If the chart contains the edges [A -> alpha . B beta, (i, j)]
+            and [B -> gamma . , (j, k)]
             then add a new edge [A -> alpha B . beta, (i, k)].
         '''
-        
-        # If the input edge is incomplete, find complete candidates to append to its end, 
+
+        # If the input edge is incomplete, find complete candidates to append to its end,
         # if its complete, find incomplete candidates to append to its start.
         if input_edge.is_complete():
             input_type = "B"
@@ -138,28 +140,28 @@ class BottomUpChartParser:
             j = input_edge.get_end()
             incomplete_edges = [input_edge] # Input edge is A edge
             complete_edges = [edge for edge in self.chart.get_edges_starting_at(j) if edge.is_complete()]
-        
-        
+
+
         ''' *** New Edges *** '''
         for incomp_edge in incomplete_edges:
             # Prepare info from incomplete edge
             i = incomp_edge.get_start()
             dot = incomp_edge.get_dot()
             prod_rule = incomp_edge.get_prod_rule()
-            known_dtrs = incomp_edge.get_daughters()
+            known_dtrs = incomp_edge.get_known_dtrs()
             next_missing_daughter = prod_rule.get_rhs_element(dot) # Get next RHS element after dot
-            
+
             for comp_edge in complete_edges:
                 if next_missing_daughter == comp_edge.get_prod_rule().get_lhs():
                     # Prepare info from complete edge
                     k = comp_edge.get_end()
-                    
+
                     # Create new edge and add to queue
                     new_dtrs = known_dtrs+[comp_edge]
                     new_edge = Edge(i, k, prod_rule, dot+1, new_dtrs)
                     print "Fundamental rule %s: [%s] + [%s] = [%s]" % (input_type, incomp_edge, comp_edge, new_edge)
                     self.queue.add_edge(new_edge)
-        
+
         ''' We have: start: i
                      end: j
                      LHS: A
@@ -167,51 +169,40 @@ class BottomUpChartParser:
             We check chart for: LHS: B
                                 Start: j
                                 End: k
-                                Complete: True 
+                                Complete: True
             We create: edge(i,k) '''
-    
-    def generate_parses(self, nbest=0):
+
+    def display_parses(self):
         '''
-        Returns a list of strings, representing possible parses, sorted by likelihood.
-        The optional nbest parameter determines how many parses are returned.
-        The default is nbest=0, which returns all parses.  
+        Display parse trees for all successful parses
         '''
-        
-        # Get all potential starting edges for the full sentence width
-        n = len(self.chart.chart)
-        start_symbol = self.grammar.get_start_symbol()
-        edges = self.chart.get_edges(0, n)
-        start_edges = [edge for edge in edges if (start_symbol == edge.get_prod_rule().get_lhs() and edge.is_complete())] # only use compete edges that can start a sentence
-        # For each starting edge, get all parses for all rhs elements
-        for start_edge in start_edges:
-            rhs_stack = start_edge.get_prod_rule().get_rhs()[:] # slicing creates a copy, allowing manipulation
-            while len(rhs_stack) > 0:
-                lhs = rhs_stack.pop()
-                start = 0
-                max_end = n - len(rhs_stack) # assumes that each element has at least length of 1. Thus, search can be narrowed down
-                self.get_parse_level(lhs, start, max_end)
-        pass
-    
-    def get_parse_level(self, lhs, start, max_end):
-        min_end = start + 1
-        for end in range(min_end, max_end+1):
-            all_edges = self.chart.get_edges(start, end)
-            edges = [edge for edge in all_edges if (lhs == edge.get_prod_rule().get_lhs() and edge.is_complete())] # only use compete edges that can start a sentence
-            for edge in edges:  # all candidates for the required lhs
-                rhs_stack = edge.get_prod_rule().get_rhs()[:] # slicing creates a copy, allowing manipulation
-                elem_start = start
-                parses = {}
-                intermediate_parses = {}
-                
-                while len(rhs_stack) > 0:
-                    elem = rhs_stack.pop()
-                    elem_end = end - len(rhs_stack) # assumes that each element has at least length of 1. Thus, search can be narrowed down
-                    elem_parses = self.get_parse_level(elem, elem_start, elem_end)
-                    
-                    if len(intermediate_parses) > 0:
-                        pass
-                    else:
-                        intermediate_parses = elem_parses
-                
-                return parses
-        pass
+        complete_parses = self.get_s_edges()
+        for complete_parse in complete_parses:
+            print '[ ' + self.display_parse(complete_parse, 'S') + ' ] ' \
+                  + str(complete_parse.get_prob())
+
+    def get_s_edges(self):
+        '''
+        Extract all edges satisfying the following constraints from
+        the chart:
+        1) The edge spans the whole input sentence
+        2) The LHS of the associated ProductionRule is "S"
+        3) The edge is complete
+        '''
+        return [edge for edge \
+                in self.chart.get_edges(0, self.chart.get_size()-1) \
+                if edge.is_complete() \
+                and edge.get_prod_rule().get_lhs() == 'S']
+
+    def display_parse(self, edge, tree):
+        '''
+        Recursively works its way down through the known daughters of
+        a given edge; returns a bracketed structure representing the
+        parse tree; in order to obtain a complete structure, this
+        method needs to be called with a string representing
+        the appropriate tree root (as the second argument)
+        '''
+        if not edge.get_known_dtrs() == []:
+            for dtr in edge.get_known_dtrs():
+                tree += ' [ ' + dtr.get_prod_rule().get_lhs() + self.display_parse(dtr, '') + ' ]'
+        return tree
