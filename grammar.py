@@ -10,43 +10,53 @@ class Grammar:
     rules = None     # Dictionary: First element on RHS (key), list of
                      # associated production rules (value)
 
-    def __init__(self, grammar):
+    def __init__(self, grammar_file):
         self.lexicon = set()
         self.rules = {}
-        self.load(grammar)
+        self.load_grammar(grammar_file)
 
-    def load(self, grammar):
+    def load_grammar(self, grammar_file):
         '''
-        This method is in charge of getting everything set up
+        Load grammar rules from a grammar file, extract lexical items
+        from the rule set and put them into the lexicon, then clean up
+        all remaining quotation marks from the rules
         '''
-        self.build_rules(grammar)
-        self.build_lexicon()
-        self.remove_quotation_marks()
+        self.load_rules_from_file(grammar_file)
+        self.extract_lexicon_from_rules()
+        self.remove_remaining_quot_marks()
 
-    ### Internal auxiliary methods ###
-    def build_rules(self, grammar):
+
+    ### START internal auxiliary methods ###
+
+    def load_rules_from_file(self, grammar_file):
         '''
-        This method populates the set of rules by extracting all
+        Populate the set of rules by extracting all
         possible rules from every line in the input grammar
         '''
-        for line in open(grammar, 'r'):
-            self.extract_rules(line)
+        for line in open(grammar_file, 'r'):
+            prod_rules = self.extract_rules_from_line(line)
+            for prod_rule in prod_rules:
+                self.add_to_rules(prod_rule)
 
-    def extract_rules(self, line):
+    def extract_rules_from_line(self, line):
         '''
-        This method extracts all possible rules from a single line of
-        the input grammar, creates ProductionRule instances from them
-        and adds appropriate entries for these instances to self.rules
+        Extract all rules from a single line of the input grammar,
+        create ProductionRule instances from them and return a list of
+        these instances
         '''
-        lhs = self.extract_lhs(line)
-        for rhs in self.extract_rhses(line):
-            prob = self.extract_prob(rhs)
-            rhs = self.seperate_dtrs(rhs)
-            prod_rule = self.generate_prod_rule(lhs, rhs, prob)
-            self.add_to_rules(prod_rule)
+        rules_in_line = []
+        lhs = self.extract_lhs_from_line(line)
+        for rhs_string in self.extract_rhs_strings_from_line(line):
+            prob = self.extract_prob_from_rhs_string(rhs_string)
+            rhs = self.split_rhs_tokens(rhs_string)
+            rules_in_line.append(self.generate_prod_rule(lhs, rhs, prob))
+        return rules_in_line
 
-    def extract_lhs(self, line):
+    def extract_lhs_from_line(self, line):
         '''
+        Extract LHS of production rule(s) represented by one line of
+        the input grammar
+
         We allow a single line of the input grammar to look like this:
 
         S -> NP VP [1.0]
@@ -56,8 +66,8 @@ class Grammar:
         NP -> NNS [0.5] | JJ NNS [0.3] | NP CC NP [0.2]
 
         Lines providing information on the POS of individual words
-        generally follow the same pattern, but they put the first (and
-        only) element on their RHS in single or double quotes:
+        generally follow the same pattern, but they put the first -
+        and only - element on their RHS in single or double quotes:
 
         NP -> 'Jack' [0.2]
         CC  -> "and" [0.9] | "or" [0.1]
@@ -69,8 +79,11 @@ class Grammar:
         '''
         return re.split(' *-> *', line)[0]
 
-    def extract_rhses(self, line):
+    def extract_rhs_strings_from_line(self, line):
         '''
+        Extract RHS(es) of production rule(s) represented by one
+        line of the input grammar
+
         We allow a single line of the input grammar to look like this:
 
         S -> NP VP [1.0]
@@ -96,10 +109,30 @@ class Grammar:
         ["'Jack' [0.2]"]
         '''
         rhses = re.split(' *-> *', line)[1]
-        return [rhs for rhs in re.split(' *\| *', rhses)]
+        return [rhs_string for rhs_string in re.split(' *\| *', rhses)]
 
-    def seperate_dtrs(self, rhs):
+    def extract_prob_from_rhs_string(self, rhs_string):
         '''
+        Extract the probability of a production rule from its RHS
+
+        After extracting it from a line of input, a single RHS looks
+        like this:
+
+        'JJ NNS [0.3]' (INPUT)
+
+        This method extracts the probability of the given RHS and
+        returns it so it can be used to construct a ProductionRule
+        instance:
+
+        0.3 (OUTPUT)
+        '''
+        return float(re.split('[\[\]]', rhs_string)[1])
+
+    def split_rhs_tokens(self, rhs_string):
+        '''
+        Turn string representing an RHS into list of individual RHS
+        tokens
+
         After extracting it from a line of input, a single RHS looks
         like this:
 
@@ -116,23 +149,8 @@ class Grammar:
         - removing the probability from the input string
         - breaking down the remaining string appropriately
         '''
-        dtrs = re.split('\[', rhs)[0]
-        return [dtr for dtr in dtrs.split()]
-
-    def extract_prob(self, rhs):
-        '''
-        After extracting it from a line of input, a single RHS looks
-        like this:
-
-        'JJ NNS [0.3]' (INPUT)
-
-        This method extracts the probability of the given RHS and
-        returns it so it can be used to construct a ProductionRule
-        instance:
-
-        0.3 (OUTPUT)
-        '''
-        return float(re.split('[\[\]]', rhs)[1])
+        rhs = re.split('\[', rhs_string)[0]
+        return [token for token in rhs.split()]
 
     def generate_prod_rule(self, lhs, rhs, prob):
         '''
@@ -144,6 +162,8 @@ class Grammar:
 
     def add_to_rules(self, prod_rule):
         '''
+        Adds a single production rule to the set of production rules
+
         To facilitate rule lookup in the predict step of the parsing
         process, production rules are stored in a dictionary (by the
         first element on their RHS) instead of a plain list. This means
@@ -162,8 +182,10 @@ class Grammar:
         else:
             self.rules[first_rhs_element] = [prod_rule]
 
-    def build_lexicon(self):
+    def extract_lexicon_from_rules(self):
         '''
+        Build a lexicon from all lexical items in the grammar
+
         Lines containing lexical items and POS information look like
         this:
 
@@ -185,8 +207,12 @@ class Grammar:
                             in self.rules.keys() \
                             if key.startswith('\'') or key.startswith('\"')]
 
-    def remove_quotation_marks(self):
+    def remove_remaining_quot_marks(self):
         '''
+        Clean up quotation marks that remain on RHS of production
+        rules representing lexical items after extracting the grammar
+        from file
+
         Lines containing lexical items and POS information look like
         this:
 
@@ -204,16 +230,13 @@ class Grammar:
                 stripped_rhs = rhs.strip('\'').strip('\"')
                 self.rules[stripped_rhs] = self.rules.pop(rhs)
                 for prod_rule in prod_rules:
-                    prod_rule.rhs = [stripped_rhs] # Setter method for
-                                                   # RHS of
-                                                   # ProductionRule
-                                                   # instance would be
-                                                   # cleaner?
+                    prod_rule.rhs = [stripped_rhs]
             else:
                 pass
 
 
-    ### External methods ###
+    ### START external methods ###
+
     def get_lexicon(self):
         '''
         Returns the lexicon
@@ -221,7 +244,7 @@ class Grammar:
         return self.lexicon
 
 
-    ## TODO: I still don't like this function name
+    # TODO: I still don't like this function name
     def get_possible_parent_rules(self, token):
         '''
         Returns list of production rules whose
@@ -231,9 +254,6 @@ class Grammar:
             return self.rules[token]
         else:
             return []
-    
-    def get_start_symbol(self):
-        return "S"
 
     def print_rules(self):
         '''
@@ -241,4 +261,4 @@ class Grammar:
         '''
         for prod_rules in self.rules.values():
             for prod_rule in prod_rules:
-                prod_rule.print_prod_rule()
+                print prod_rule.__str__()
