@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import unittest
 from bottom_up_chart_parser import BottomUpChartParser
 
@@ -7,15 +9,12 @@ class Test(unittest.TestCase):
     def setUp(self):
         self.bop = BottomUpChartParser("sample.pcfg")
 
-
     def tearDown(self):
         pass
-
 
     def test_parse_simple(self):
         self.bop.parse("Jack saw cats")
         self.bop.chart.print_chart()
-        
 
 
 if __name__ == "__main__":

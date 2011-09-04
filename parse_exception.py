@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 class ParseException(Exception):
     def __init__(self, value):
         self.value = value
