@@ -21,4 +21,7 @@ class Queue:
         self.queue.append(edge)
 
     def is_empty(self):
+        '''
+        Check whether or not queue contains any items
+        '''
         return True if len(self.queue) == 0 else False
