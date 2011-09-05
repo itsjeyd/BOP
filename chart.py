@@ -64,6 +64,18 @@ class Chart:
             edges.append(row[j])
         return [edge for edge in itertools.chain(*edges)]
 
+    def get_s_edges(self):
+        '''
+        Return all edges from the chart which satisfy the following
+        constraints:
+        1) The edge spans the whole input sentence
+        2) The LHS of the associated ProductionRule is "S"
+        3) The edge is complete
+        '''
+        return [edge for edge \
+                in self.chart[0][self.size-1] \
+                if edge.is_complete() \
+                and edge.get_prod_rule().get_lhs() == 'S']
 
     def print_chart(self):
         '''
