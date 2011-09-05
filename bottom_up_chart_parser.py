@@ -100,6 +100,12 @@ class BottomUpChartParser:
             self.queue.add_edge(edge)
 
     def enough_parses_found(self, n):
+        '''
+        Check if enough parses have been found for the input sentence
+
+        Return True if the number of S edges that the chart contains
+        is >= the number of parses that the user wants, else False
+        '''
         return True if len(self.chart.get_s_edges()) >= n else False
 
     def predict_rule(self, complete_edge):
