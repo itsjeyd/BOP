@@ -23,6 +23,9 @@ class Chart:
     def get_edges_ending_at(self, j):
         pass
 
+    def get_s_edges(self):
+        pass
+
     def print_chart(self):
         pass
 
@@ -32,42 +35,42 @@ class Edge:
     start = -1
     end = -1
     prob = -1.0
-    prod_rule = None # Object of type ProductionRule
+    prod_rule = None
     dot = -1
     complete = False
-    known_dtrs = None # List of immediate daughters of type Edge
+    known_dtrs = None
 
     def __init__(self, start, end, prod_rule, dot, known_dtrs):
         pass
 
-    def get_start(self):
-        return self.start
-
-    def get_end(self):
-        return self.end
-
-    def get_prob(self):
-        return self.prob
-
-    def get_prod_rule(self):
-        return self.prod_rule
-
-    def get_dot(self):
-        return self.dot
+    def __str__(self):
+        pass
 
     def calc_prob(self, prod_rule, known_dtrs):
-        pass # called by __init__
-
-    def is_complete(self):
-        return self.complete
+        pass
 
     def set_complete(self):
         pass
 
-    def get_known_dtrs(self):
+    def get_start(self):
         pass
 
-    def __str__(self):
+    def get_end(self):
+        pass
+
+    def get_prob(self):
+        pass
+
+    def get_prod_rule(self):
+        pass
+
+    def get_dot(self):
+        pass
+
+    def is_complete(self):
+        pass
+
+    def get_known_dtrs(self):
         pass
 
 
@@ -76,7 +79,6 @@ class Queue:
     queue = None
 
     def __init__(self):
-        # initialize self.queue as empty list
         pass
 
     def get_next_edge(self):
@@ -99,25 +101,22 @@ class ProductionRule:
     def __init__(self, lhs, rhs, prob):
         pass
 
+    def __str__(self):
+        pass
+
     def get_lhs(self):
-        return self.lhs
+        pass
 
     def get_rhs(self):
-        return self.rhs
+        pass
 
     def get_rhs_element(self, index):
-        return self.rhs[index]
+        pass
 
     def get_rhs_length(self):
-        return len(self.rhs)
+        pass
 
     def get_prob(self):
-        return self.prob
-
-    def print_prod_rule(self):
-        pass # calls self.format_rhs()
-
-    def format_rhs(self):
         pass
 
 
@@ -130,32 +129,32 @@ class BottomUpChartParser:
     def __init__(self, grammar):
         pass
 
-    def parse(self, sentence):
+    def parse(self, sentence, n=1):
         '''
-        1) Initialize empty chart
-        2) Apply init_rule to each word in input sentence
-        3) Until no more edges are added:
-        - Apply predict_rule everywhere it applies (push to queue)
-        - Apply fundamental rule everywhere it applies (push to queue)
-        4) Display parses
+        (1) Tokenize input sentence
+        (2) Check for unknown words
+        (3) Initialize empty chart and queue
+        (4) Apply init_rule to each word in input sentence
+        (5) Until no more edges are added or enough parses found:
+            - Transfer edge from queue to chart
+            - Apply predict rule everywhere it applies
+            - Apply fundamental rule everywhere it applies
+            - Push new edges to queue
+        (6) Display parses
         '''
         pass
 
     def tokenize(self, sentence):
-        return sentence.split()
-
-    def sentence_contains_unknown_words(self, tokens):
-        '''
-        Returns True if the current sentence contains unknown words,
-        else False
-        '''
         pass
 
     def get_unknown_words(self, tokens):
         pass
 
     def init_rule(self, token, pos):
-        pass # pos = start of Edge
+        pass
+
+    def enough_parses_found(self, n):
+        pass
 
     def predict_rule(self, complete_edge):
         pass
@@ -166,40 +165,37 @@ class BottomUpChartParser:
     def display_parses(self):
         pass
 
-    def get_s_edges(self):
-        pass
-
-    def display_parse(self):
+    def build_parse_from_edge(self, edge, root):
         pass
 
 
 class Grammar:
 
-    rules = None # Dictionary: First element on RHS (key), list of
-                 # associated production rules (value)
+    rules = None
+    lexicon = None
 
-    def __init__(self, grammar):
-        pass # calls load
-
-    def load(self, grammar):
+    def __init__(self, grammar_file):
         pass
 
-    def build_rules(self, grammar):
+    def load_grammar(self, grammar_file):
         pass
 
-    def extract_rules(self, line):
+    def load_rules_from_file(self, grammar_file):
         pass
 
-    def extact_lhs(self, line):
+    def extract_rules_from_line(self, line):
         pass
 
-    def extract_rhses(self, line):
+    def extact_lhs_from_line(self, line):
         pass
 
-    def seperate_dtrs(self, rhs):
+    def extract_rhs_strings_from_line(self, line):
         pass
 
-    def extract_prob(self, line):
+    def extract_prob_from_rhs_string(self, rhs_string):
+        pass
+
+    def split_rhs_tokens(self, rhs_string):
         pass
 
     def generate_prod_rule(self, lhs, rhs, prob):
@@ -208,33 +204,37 @@ class Grammar:
     def add_to_rules(self, prod_rule):
         pass
 
-    def build_lexicon(self):
+    def extract_lexicon_from_rules(self):
         pass
 
-    def remove_quotation_marks(self):
+    def remove_remaining_quot_marks(self):
         pass
 
     def get_lexicon(self):
         pass
 
-    def get_start_symbol(self):
-        pass
-
     def get_possible_parent_rules(self, token):
-        ''' Returns list of production rules whose
-            first RHS element is the given token
-        '''
         pass
 
     def print_rules(self):
         pass
 
 
-class parse_exception:
+class ParseException:
     def __init__(self, value):
         pass
 
     def __str__(self):
         pass
 
-# class Main: pass
+
+class Test(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_parse_simple(self):
+        pass
