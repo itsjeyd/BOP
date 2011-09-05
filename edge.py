@@ -33,7 +33,7 @@ class Edge:
                                             # allowing manipulation
         rhs.insert(self.dot, ".")
         rhs_string = " ".join(rhs)
-        return "%s = %s (%i:%i, %s)" % (lhs, rhs_string, self.start, self.end, self.prob)
+        return "%s ---> %s (%i:%i, %s)" % (lhs, rhs_string, self.start, self.end, self.prob)
 
 
     ### START internal auxiliary methods ###

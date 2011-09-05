@@ -17,7 +17,7 @@ class ProductionRule:
         '''
         Return string representation of the production rule
         '''
-        return "%s = %s (%s)" % (self.lhs, " ".join(self.rhs), self.prob)
+        return "%s ---> %s (%s)" % (self.lhs, " ".join(self.rhs), self.prob)
 
     def get_lhs(self):
         '''
