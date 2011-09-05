@@ -132,7 +132,8 @@ class BottomUpChartParser:
         "advancing the dot", i.e. by matching incomplete edges with
         appropriate complete ones:
 
-        (1) If the input edge is incomplete, find all complete edges                   - whose start node equals the end node of the input edge
+        (1) If the input edge is incomplete, find all complete edges
+            - whose start node equals the end node of the input edge
             - whose LHS matches the RHS element
               that the input edge is currently looking for.
             If the input edge is complete, find all incomplete edges
