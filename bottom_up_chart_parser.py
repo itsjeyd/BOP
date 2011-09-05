@@ -103,8 +103,9 @@ class BottomUpChartParser:
         '''
         Check if enough parses have been found for the input sentence
 
-        Return True if the number of S edges that the chart contains
-        is >= the number of parses that the user wants, else False
+        Return True if the number of complete S edges that the chart
+        contains is >= the number of parses that the user wants, else
+        False
         '''
         return True if len(self.chart.get_s_edges()) >= n else False
 
@@ -113,6 +114,9 @@ class BottomUpChartParser:
         If the LHS of a complete edge can be the first RHS element of
         a production rule, create a self-loop edge with that rule and
         push it to the queue
+
+        Input: Complete edge
+        Push to queue: Incomplete self-loop edges
 
         Formal definition:
             For each complete edge [A -> alpha . , (i, j)]
