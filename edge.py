@@ -101,3 +101,23 @@ class Edge:
         '''
         return self.known_dtrs
 
+    def is_equal_to(self, edge):
+        """
+        Check if edge is equal to input edge
+        """
+        # if not self.complete == edge.is_complete():
+        #     return False
+        if not self.start == edge.get_start():
+            return False
+        elif not self.end == edge.get_end():
+            return False
+        # elif not self.dot == edge.get_dot():
+        #     return False
+        elif not self.prod_rule == edge.get_prod_rule():
+            return False
+        elif not self.prob <= edge.get_prob():
+            return False
+        elif not self.known_dtrs == edge.get_known_dtrs():
+            return False
+        else:
+            return True
