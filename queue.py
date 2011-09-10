@@ -25,3 +25,12 @@ class Queue:
         Check whether or not queue contains any items
         '''
         return True if len(self.queue) == 0 else False
+
+    def has_edge(self, edge):
+        """
+        Check if queue contains the input edge
+        """
+        for queued_edge in self.queue:
+            if queued_edge.is_equal_to(edge):
+                return True
+        return False
