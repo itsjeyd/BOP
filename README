@@ -8,7 +8,7 @@ TODO -- next steps:
 - Strategies for queue
 
 QUESTIONS:
-- Where would we specify how many parses should be returned? Parameter for parse method? YES. See last commit of bottom_up_chart_parser.py.
+- Where would we specify how many parses should be returned? Parameter for parse method? YES. This has already been incorporated in bottom_up_chart_parser.py.
 
 REMARKS:
 - Erster Satz des Kommentars sollte eine Kurzbeschreibung der Methode sein, deren Lektüre ausreicht, um einem grob klarzumachen, wofür eine Methode ist.
