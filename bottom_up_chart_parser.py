@@ -18,7 +18,7 @@ class BottomUpChartParser:
     def __init__(self, grammar):
         self.grammar = Grammar(grammar)
 
-    def parse(self, sentence, n=1):
+    def parse(self, sentence, number_of_parses=1):
         '''
         Parse the input sentence
 
@@ -46,7 +46,7 @@ class BottomUpChartParser:
 
         # (3) Repeat until no more edges are added
         #     or sufficient number of parses has been found:
-        while not self.queue.is_empty() and not self.enough_parses_found(n):
+        while not self.queue.is_empty() and not self.enough_parses_found(number_of_parses):
             # (3.1) Add next element on queue to the chart
             edge = self.queue.get_next_edge()
             self.chart.add_edge(edge)
@@ -99,7 +99,7 @@ class BottomUpChartParser:
             edge = Edge(node, node+1, rule, 0, [])
             self.queue.add_edge(edge)
 
-    def enough_parses_found(self, n):
+    def enough_parses_found(self, number_of_parses):
         '''
         Check if enough parses have been found for the input sentence
 
@@ -107,7 +107,7 @@ class BottomUpChartParser:
         contains is >= the number of parses that the user wants, else
         False
         '''
-        return True if len(self.chart.get_s_edges()) >= n else False
+        return True if len(self.chart.get_s_edges()) >= number_of_parses else False
 
     def predict_rule(self, complete_edge):
         '''
@@ -129,9 +129,10 @@ class BottomUpChartParser:
 
         for parent_rule in parent_rules:
             new_edge = Edge(start, start, parent_rule, 0, [])
-            print "Predict rule: [%s] + [%s] = [%s]" \
-                  % (complete_edge, parent_rule, new_edge)
-            self.queue.add_edge(new_edge)
+            if not self.queue.has_edge(new_edge) and not self.chart.has_edge(new_edge):
+                print "Predict rule: [%s] + [%s] = [%s]" \
+                      % (complete_edge, parent_rule, new_edge)
+                self.queue.add_edge(new_edge)
 
     def fundamental_rule(self, input_edge):
         '''
@@ -152,7 +153,10 @@ class BottomUpChartParser:
               edge.
         (2) From every pairing, create a new edge with the dot
             advanced over the RHS element that has just been found.
-        (3) Push that edge to the queue.
+        (3) Push that edge to the queue IFF it does not exist already,
+            i.e. if it has not been added to the chart or the queue
+            before. This constraint keeps the parser from entering an
+            infinite loop when using left-recursive grammar rules.
 
         Input: Single edge
         Push to queue: Complete and incomplete edges
@@ -183,6 +187,7 @@ class BottomUpChartParser:
             dot = incomp_edge.get_dot()
             next_missing_dtr = prod_rule.get_rhs_element(dot)
             for comp_edge in complete_edges:
+
                 # ... check for compatibility with complete edges:
                 if next_missing_dtr == comp_edge.get_prod_rule().get_lhs():
 
@@ -195,12 +200,14 @@ class BottomUpChartParser:
 
                     # Combine info from both edges,
                     # and use it to create new edge
-                    known_dtrs += [comp_edge]
-                    new_edge = Edge(i, k, prod_rule, dot+1, known_dtrs)
-                    print "Fundamental rule: [%s] + [%s] = [%s]" \
-                          % (incomp_edge, comp_edge, new_edge)
+                    new_dtrs = known_dtrs + [comp_edge]
+                    new_edge = Edge(i, k, prod_rule, dot+1, new_dtrs)
+
                     # Add new edge to queue
-                    self.queue.add_edge(new_edge)
+                    if not self.queue.has_edge(new_edge) and not self.chart.has_edge(new_edge):
+                        print "Fundamental rule: [%s] + [%s] = [%s]" \
+                              % (incomp_edge, comp_edge, new_edge)
+                        self.queue.add_edge(new_edge)
 
     def display_parses(self):
         '''
