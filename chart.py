@@ -77,6 +77,16 @@ class Chart:
                 if edge.is_complete() \
                 and edge.get_prod_rule().get_lhs() == 'S']
 
+    def has_edge(self, edge):
+        """
+        Check if chart contains the input edge
+        """
+        chart_edges = self.get_edges(edge.get_start(), edge.get_end())
+        for chart_edge in chart_edges:
+            if chart_edge.is_equal_to(edge):
+                return True
+        return False
+
     def print_chart(self):
         '''
         Systematically print contents of each cell of the chart
