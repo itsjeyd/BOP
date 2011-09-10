@@ -26,6 +26,9 @@ class Chart:
     def get_s_edges(self):
         pass
 
+    def has_edge(self, edge):
+        pass
+
     def print_chart(self):
         pass
 
@@ -73,6 +76,9 @@ class Edge:
     def get_known_dtrs(self):
         pass
 
+    def is_equal_to(self, edge):
+        pass
+
 
 class Queue:
 
@@ -88,6 +94,9 @@ class Queue:
         pass
 
     def is_empty(self):
+        pass
+
+    def has_edge(self):
         pass
 
 
@@ -153,7 +162,7 @@ class BottomUpChartParser:
     def init_rule(self, token, pos):
         pass
 
-    def enough_parses_found(self, n):
+    def enough_parses_found(self, number_of_parses):
         pass
 
     def predict_rule(self, complete_edge):
