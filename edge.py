@@ -105,14 +105,10 @@ class Edge:
         """
         Check if edge is equal to input edge
         """
-        # if not self.complete == edge.is_complete():
-        #     return False
         if not self.start == edge.get_start():
             return False
         elif not self.end == edge.get_end():
             return False
-        # elif not self.dot == edge.get_dot():
-        #     return False
         elif not self.prod_rule == edge.get_prod_rule():
             return False
         elif not self.prob <= edge.get_prob():
