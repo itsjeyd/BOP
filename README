@@ -4,8 +4,7 @@ TODO -- always:
 - Refactor
 
 TODO -- next steps:
-- Grammatik finden (Anna, Tim)
-- Strategies for queue
+- n-best strategy for queue (ALMOST THERE! :])
 
 QUESTIONS:
 - Where would we specify how many parses should be returned? Parameter for parse method? YES. This has already been incorporated in bottom_up_chart_parser.py.
