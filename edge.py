@@ -79,11 +79,12 @@ class Edge:
 
     def get_dot(self):
         '''
-        Returns the position of the dot on the right hand side.
-        This indicates how far the production rule could already be applied.
-        0 indicates no part of the right hand side applied yet.
-        If the rule was completely applied, the dot position equals the number
-            of right hand side tokens.
+        Returns the position of the dot on the right-hand side of the
+        production rule associated with the edge. This indicates how
+        far the production rule could already be applied. 0 indicates
+        no part of the right hand side applied yet. If the rule was
+        completely applied, the dot position equals the number of
+        right hand side tokens.
         '''
         return self.dot
 
