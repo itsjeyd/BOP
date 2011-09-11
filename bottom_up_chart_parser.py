@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from chart import Chart
-from queue import Queue, PriorityQueue
+from queue import Queue, BestFirstQueue
 from edge import Edge
 from production_rule import ProductionRule
 from grammar import Grammar
@@ -18,7 +18,7 @@ class BottomUpChartParser:
     def __init__(self, grammar):
         self.grammar = Grammar(grammar)
 
-    def parse(self, sentence, number_of_parses=1):
+    def parse(self, sentence, number_of_parses=1, strategy='bestfirst'):
         '''
         Parse the input sentence
 
@@ -37,9 +37,8 @@ class BottomUpChartParser:
 
         ### Main steps ###
         # (1) Initialize empty chart and queue
-        n = len(tokens)
-        self.chart = Chart(n+1)
-        self.queue = PriorityQueue()
+        self.initialize_chart(tokens)
+        self.initialize_queue(strategy)
 
         # (2) For every token, create a complete edge and push it to
         #     the queue
@@ -66,7 +65,6 @@ class BottomUpChartParser:
         self.display_parses()
         print '========================='
 
-
     def tokenize(self, sentence):
         '''
         Separate a sentence into a list of tokens and return the list.
@@ -83,6 +81,25 @@ class BottomUpChartParser:
         lexicon = self.grammar.get_lexicon()
         unknown_words = [token for token in tokens if token not in lexicon]
         return unknown_words
+
+    def initialize_chart(self, tokens):
+        '''
+        Initialize chart of size tokens + 1
+        '''
+        n = len(tokens)
+        self.chart = Chart(n+1)
+
+    def initialize_queue(self, strategy):
+        '''
+        Initialize queue according to the parsing strategy chosen by
+        the user
+        '''
+        if strategy == 'none':
+            self.queue = Queue()
+        elif strategy == 'bestfirst':
+            self.queue = BestFirstQueue()
+        else:
+            pass
 
     def init_rule(self, tokens):
         '''
