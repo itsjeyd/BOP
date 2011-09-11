@@ -215,8 +215,8 @@ class BottomUpChartParser:
         '''
         s_edges = self.chart.get_s_edges()
         for s_edge in s_edges:
-            print '[ ' + self.build_parse_from_edge(s_edge, 'S') + ' ] ' \
-                  + str(s_edge.get_prob())
+            bracket_str = self.build_parse_from_edge(s_edge, 'S')
+            print self.add_indentation(bracket_str) + '\t' + str(s_edge.get_prob())
 
     def build_parse_from_edge(self, edge, root):
         '''
@@ -232,3 +232,21 @@ class BottomUpChartParser:
             for dtr in edge.get_known_dtrs():
                 root += ' [ ' + dtr.get_prod_rule().get_lhs() + self.build_parse_from_edge(dtr, '') + ' ]'
         return root
+        
+    def add_indentation(self, bracket_structure):
+        '''
+        Converts flat string of bracketed syntactic structure to indented structure 
+        '''
+        bracket_structure = '[ ' + bracket_structure + ' ]'
+        indented = ''
+        tabs = -1
+        for l in bracket_structure:
+            if l == '[':
+                tabs += 1
+                indented += '\n' + '\t'*tabs + l
+            elif l == ']':
+                tabs -= 1
+                indented += l
+            else:
+                indented += l
+        return indented
