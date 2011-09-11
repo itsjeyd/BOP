@@ -100,6 +100,12 @@ class Queue:
         pass
 
 
+class BestFirstQueue(Queue):
+
+    def get_next_edge(self):
+        pass
+
+
 class ProductionRule:
 
     lhs = ''
@@ -159,6 +165,12 @@ class BottomUpChartParser:
     def get_unknown_words(self, tokens):
         pass
 
+    def initialize_chart(self, tokens):
+        pass
+
+    def initialize_queue(self, strategy):
+        pass
+
     def init_rule(self, token, pos):
         pass
 
@@ -174,7 +186,10 @@ class BottomUpChartParser:
     def display_parses(self):
         pass
 
-    def build_parse_from_edge(self, edge, root):
+    def build_parse_string_from_edge(self, edge, root):
+        pass
+
+    def add_indentation_to_parse_string(self, parse_string):
         pass
 
 
