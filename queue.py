@@ -34,3 +34,19 @@ class Queue:
             if queued_edge.is_equal_to(edge):
                 return True
         return False
+
+
+class PriorityQueue(Queue):
+    ''' This class implements a priority queue '''
+
+    def get_next_edge(self):
+        '''
+        Pop edge with highest associated probability from queue
+
+        Sort edges on queue according to their probabilities.
+        '''
+        if not self.is_empty():
+            self.queue.sort(key=lambda edge: edge.get_prob(), reverse=True)
+            return self.queue.pop(0)
+        else:
+            return None
