@@ -36,8 +36,10 @@ class Queue:
         return False
 
 
-class PriorityQueue(Queue):
-    ''' This class implements a priority queue '''
+class BestFirstQueue(Queue):
+    '''
+    This class implements a queue sorted according to edge probabilites
+    '''
 
     def get_next_edge(self):
         '''
