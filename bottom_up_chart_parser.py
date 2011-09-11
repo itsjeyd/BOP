@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from chart import Chart
-from queue import Queue
+from queue import Queue, PriorityQueue
 from edge import Edge
 from production_rule import ProductionRule
 from grammar import Grammar
@@ -39,9 +39,10 @@ class BottomUpChartParser:
         # (1) Initialize empty chart and queue
         n = len(tokens)
         self.chart = Chart(n+1)
-        self.queue = Queue()
+        self.queue = PriorityQueue()
 
-        # (2) For every token, create a complete edge and push it to the queue
+        # (2) For every token, create a complete edge and push it to
+        #     the queue
         self.init_rule(tokens)
 
         # (3) Repeat until no more edges are added
@@ -215,10 +216,10 @@ class BottomUpChartParser:
         '''
         s_edges = self.chart.get_s_edges()
         for s_edge in s_edges:
-            bracket_str = self.build_parse_from_edge(s_edge, 'S')
-            print self.add_indentation(bracket_str) + '\t' + str(s_edge.get_prob())
+            parse_string = self.build_parse_string_from_edge(s_edge, 'S')
+            print self.add_indentation_to_parse_string(parse_string) + '\t' + str(s_edge.get_prob())
 
-    def build_parse_from_edge(self, edge, root):
+    def build_parse_string_from_edge(self, edge, root):
         '''
         Recursively work your way down through the known daughters of
         the input edge; return a bracketed structure representing the
@@ -230,23 +231,24 @@ class BottomUpChartParser:
         '''
         if not edge.get_known_dtrs() == []:
             for dtr in edge.get_known_dtrs():
-                root += ' [ ' + dtr.get_prod_rule().get_lhs() + self.build_parse_from_edge(dtr, '') + ' ]'
+                root += ' [ ' + dtr.get_prod_rule().get_lhs() + self.build_parse_string_from_edge(dtr, '') + ' ]'
         return root
-        
-    def add_indentation(self, bracket_structure):
+
+    def add_indentation_to_parse_string(self, parse_string):
         '''
-        Converts flat string of bracketed syntactic structure to indented structure 
+        Convert flat string representation of parse to appropriately
+        indented structure
         '''
-        bracket_structure = '[ ' + bracket_structure + ' ]'
-        indented = ''
-        tabs = -1
-        for l in bracket_structure:
-            if l == '[':
-                tabs += 1
-                indented += '\n' + '\t'*tabs + l
-            elif l == ']':
-                tabs -= 1
-                indented += l
+        parse_string = '[ ' + parse_string + ' ]'
+        indented_string = ''
+        level = -1
+        for char in parse_string:
+            if char == '[':
+                level += 1
+                indented_string += '\n' + '\t'*level + char
+            elif char == ']':
+                level -= 1
+                indented_string += char
             else:
-                indented += l
-        return indented
+                indented_string += char
+        return indented_string
