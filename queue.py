@@ -12,13 +12,13 @@ class Queue:
         '''
         Pop first element from queue
         '''
-        return self.queue.pop(0) if not self.is_empty() else None
+        return self.queue.pop() if not self.is_empty() else None
 
     def add_edge(self, edge):
         '''
         Push new edge onto queue
         '''
-        self.queue.append(edge)
+        self.queue.insert(0, edge)
 
     def is_empty(self):
         '''
@@ -41,14 +41,14 @@ class BestFirstQueue(Queue):
     This class implements a queue sorted according to edge probabilites
     '''
 
-    def get_next_edge(self):
-        '''
-        Pop edge with highest associated probability from queue
+    from bisect import bisect
 
-        Sort edges on queue according to their probabilities.
+    def add_edge(self, new_edge):
         '''
-        if not self.is_empty():
-            self.queue.sort(key=lambda edge: edge.get_prob(), reverse=True)
-            return self.queue.pop(0)
-        else:
-            return None
+        Push new edge onto queue
+
+        Insert edge into the queue according to its probability
+        '''
+        pos = bisect([edge.get_prob() for edge in self.queue], new_edge)
+        self.queue.insert(pos, new_edge)
+
