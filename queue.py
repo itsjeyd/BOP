@@ -36,12 +36,12 @@ class Queue:
         return False
 
 
+from bisect import bisect
+
 class BestFirstQueue(Queue):
     '''
     This class implements a queue sorted according to edge probabilites
     '''
-
-    from bisect import bisect
 
     def add_edge(self, new_edge):
         '''
