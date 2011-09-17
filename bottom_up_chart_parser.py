@@ -47,6 +47,10 @@ class BottomUpChartParser:
         # (3) Repeat until no more edges are added
         #     or sufficient number of parses has been found:
         while not self.queue.is_empty() and not self.enough_parses_found(number_of_parses):
+            ''' If strategy==xmas and new complete s-edge (0:sentence_length) was found
+                   xmas_parse(s-edge)
+                else (all the rest)'''
+            
             # (3.1) Add next element on queue to the chart
             edge = self.queue.get_next_edge()
             self.chart.add_edge(edge)
@@ -64,7 +68,69 @@ class BottomUpChartParser:
         print '========================='
         self.display_parses()
         print '========================='
-
+    
+    def xmas_parse(self, s_edge):
+#        daughters = s_edge.get_known_dtrs()
+#        candidates = []
+#        for daughter in daughters:
+#            new_candidate = queue.
+        ''' WARNING! BULLSHIT!
+        collect candidates
+                candidate is edge(lhs,i,j) like daughter of s-edge 
+                candidate comes from chart or queue
+                if from chart:
+                    candidate must not be daughter of other s?
+                
+                 '''
+        ''' WARNING! BULLSHIT!
+        max_prob = 
+        for s-edge in s-edges:
+            daughter-tuple for each s-edge
+            candidates = {}
+            for each daughter:
+                dtr_candidates = []
+                dtr_candidates.add(candidates in chart)
+                dtr_candidates.add(candidates in queue)
+                best_candidate = max(dtr_candidates)
+                candidates.put(daughter, best_candidate)
+        for c1 in candidates:
+            for c2 in candidates:
+                if c1.end == c2.start
+                    and c1.start == 
+        '''
+        
+    ''' GOOD STUFF!
+    def xmas_parse(self, s_edge):
+        new_s_edge = xmas_recurse(s_edge)
+        xmas_cleanup(new_s_edge)
+        
+    def xmas_recurse(self, root_edge)
+        given: list of daughters of root_edge
+               list of candidates = []
+        for dtr in list of daughters:
+            get best candidate
+            add best candidate to list of candidates
+        if list of candidates is empty:
+            for dtr in list of daughters:
+                list of candidates.add(recursive_search(dtr))
+        list of combinations = []
+        for pos in len(list of daughters):
+            dtr_list_copy = copy list of daughters
+            dtr_list_copy.replace(pos, pos in list of candidates)
+            list of combinations.add(dtr_list_copy)
+        throw out combinations that are used as edge(root_edge lhs, combination rhs) already
+        best combination = max arg for prob(combinations)
+        create new edge(root_edge lhs, combination rhs)
+        return new edge
+        
+    def xmas_cleanup(self, new_edge):
+        if new_edge not in chart:
+            add new_edge to chart
+            if new_edge in queue, remove from queue
+            for dtr in new_edge.dtrs:
+                xmas_cleanup(dtr)
+        '''
+    
     def tokenize(self, sentence):
         '''
         Separate a sentence into a list of tokens and return the list.
