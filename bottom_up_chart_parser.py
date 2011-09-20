@@ -69,7 +69,7 @@ class BottomUpChartParser:
         self.display_parses()
         print '========================='
     
-    def xmas_parse(self, s_edge):
+#    def xmas_parse(self, s_edge):
 #        daughters = s_edge.get_known_dtrs()
 #        candidates = []
 #        for daughter in daughters:
@@ -99,37 +99,62 @@ class BottomUpChartParser:
                     and c1.start == 
         '''
         
-    ''' GOOD STUFF!
+    ''' GOOD STUFF! '''
     def xmas_parse(self, s_edge):
-        new_s_edge = xmas_recurse(s_edge)
-        xmas_cleanup(new_s_edge)
+        new_s_edge = self.xmas_recurse(s_edge)
+        self.xmas_cleanup(new_s_edge)
         
-    def xmas_recurse(self, root_edge)
-        given: list of daughters of root_edge
-               list of candidates = []
-        for dtr in list of daughters:
-            get best candidate
-            add best candidate to list of candidates
-        if list of candidates is empty:
-            for dtr in list of daughters:
-                list of candidates.add(recursive_search(dtr))
-        list of combinations = []
-        for pos in len(list of daughters):
-            dtr_list_copy = copy list of daughters
-            dtr_list_copy.replace(pos, pos in list of candidates)
-            list of combinations.add(dtr_list_copy)
-        throw out combinations that are used as edge(root_edge lhs, combination rhs) already
-        best combination = max arg for prob(combinations)
-        create new edge(root_edge lhs, combination rhs)
-        return new edge
+    def xmas_recurse(self, root_edge):
+        dtrs = root_edge.get_known_dtrs()
+        candidates = []
+        combinations = []
+        
+        for dtr in dtrs:
+            #get best candidate
+            candidate = None
+            ''' TODO: Determine best candidate '''
+            candidates.append(candidate)
+        
+        if len(candidates) == 0:
+            for dtr in dtrs:
+                child_candidate = self.xmas_recurse(dtr)
+                ''' TODO: What list add function do we require?
+                    Do we get a list of candidates or just a single one?
+                '''
+                candidates.append(child_candidate)
+        
+        for pos in range(len(dtrs)):
+            dtrs_copy = dtrs[:]
+            dtrs_copy = []
+            ''' TODO: I believe we might run into trouble here, 
+                if e.g. there was no candidate for the first dtr element,
+                but one for the second.
+                A workaround would be to use filler elements (can you add
+                None to a list?), although we then have to add appropriate
+                checks for them here and for the child candidate case. '''
+            dtrs_copy[pos] = candidates[pos]
+            combinations.append(dtrs_copy)
+        ''' TODO: throw out combinations that are used as 
+            edge(root_edge lhs, combination rhs) already
+        '''
+        ''' TODO: best combination = max arg for prob(combinations) '''
+        max_combination = None
+        
+        start = root_edge.get_start()
+        end = root_edge.get_end()
+        prod_rule = root_edge.get_prod_rule()
+        dot = root_edge.get_dot()
+        known_dtrs = max_combination
+        new_edge = Edge(start, end, prod_rule, dot, known_dtrs)
+        return new_edge
+        pass
         
     def xmas_cleanup(self, new_edge):
-        if new_edge not in chart:
-            add new_edge to chart
-            if new_edge in queue, remove from queue
-            for dtr in new_edge.dtrs:
-                xmas_cleanup(dtr)
-        '''
+        if not self.chart.has_edge(new_edge):
+            self.chart.add_edge(new_edge)
+            ''' TODO: if new_edge in queue, remove from queue '''
+            for dtr in new_edge.get_known_dtrs():
+                self.xmas_cleanup(dtr)
     
     def tokenize(self, sentence):
         '''
