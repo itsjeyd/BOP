@@ -61,9 +61,7 @@ class BottomUpChartParser:
             self.fundamental_rule(edge)
 
         # 4) Display generated parses
-        print '========================='
         self.display_parses()
-        print '========================='
 
     def tokenize(self, sentence):
         '''
@@ -148,8 +146,6 @@ class BottomUpChartParser:
         for parent_rule in parent_rules:
             new_edge = Edge(start, start, parent_rule, 0, [])
             if not self.queue.has_edge(new_edge) and not self.chart.has_edge(new_edge):
-                print "Predict rule: [%s] + [%s] = [%s]" \
-                      % (complete_edge, parent_rule, new_edge)
                 self.queue.add_edge(new_edge)
 
     def fundamental_rule(self, input_edge):
@@ -223,8 +219,6 @@ class BottomUpChartParser:
 
                     # Add new edge to queue
                     if not self.queue.has_edge(new_edge) and not self.chart.has_edge(new_edge):
-                        print "Fundamental rule: [%s] + [%s] = [%s]" \
-                              % (incomp_edge, comp_edge, new_edge)
                         self.queue.add_edge(new_edge)
 
     def display_parses(self):
