@@ -6,6 +6,7 @@ from edge import Edge
 from production_rule import ProductionRule
 from grammar import Grammar
 from parse_exception import ParseException
+from queue_exception import QueueException
 
 class BottomUpChartParser:
 
@@ -97,7 +98,7 @@ class BottomUpChartParser:
         elif strategy == 'bestfirst':
             self.queue = BestFirstQueue()
         else:
-            pass
+            raise QueueException('Could not create queue. Strategy must be "none" or "bestfirst".')
 
     def init_rule(self, tokens):
         '''
