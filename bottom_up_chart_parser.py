@@ -18,7 +18,7 @@ class BottomUpChartParser:
     def __init__(self, grammar):
         self.grammar = Grammar(grammar)
 
-    def parse(self, sentence, number_of_parses=1, strategy='bestfirst'):
+    def parse(self, sentence, number_of_parses, strategy):
         '''
         Parse the input sentence
 
