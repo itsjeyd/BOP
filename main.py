@@ -22,7 +22,8 @@ class Main:
         print 'Usage:\
         \nThe program will prompt you for three things:\
         \n\n(1) a sentence\
-        \n(2) the maximum number of parses you would like to see for it\
+        \n(2) the maximum number of parses you would like to see for it;\
+        \n    if you want to see all possible parses, this should be -1\
         \n(3) the parsing strategy: {none, bestfirst}\
         \n\nThe maximum number of parses defaults to 1.\
         \nThe parsing strategy defaults to bestfirst.\
