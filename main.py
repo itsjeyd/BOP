@@ -61,7 +61,7 @@ class Main:
                 strategy = 'bestfirst'
 
             try:
-                self.parser.parse(sentence, number_of_parses, strategy)
+                self.parser.parse(sentence, int(number_of_parses), strategy)
             except ParseException as e:
                 print '\n' + e.value + '\n'
                 self.print_vocabulary()
