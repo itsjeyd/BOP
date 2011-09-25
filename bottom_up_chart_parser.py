@@ -124,7 +124,7 @@ class BottomUpChartParser:
         contains is >= the number of parses that the user wants, else
         False
         '''
-        return True if len(self.chart.get_s_edges()) >= number_of_parses else False
+        return False if (number_of_parses == -1 or len(self.chart.get_s_edges()) < number_of_parses) else True
 
     def predict_rule(self, complete_edge):
         '''
