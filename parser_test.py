@@ -14,7 +14,7 @@ class Test(unittest.TestCase):
 
     def runTest(self):
         self.setUp()
-        self.bop.parse('big cats and dogs saw Jack with telescopes')
+        self.bop.parse('big cats and dogs saw Jack with telescopes', 1, 'bestfirst')
         self.bop.chart.print_chart()
         self.tearDown()
 
