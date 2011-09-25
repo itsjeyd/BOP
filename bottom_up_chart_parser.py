@@ -34,7 +34,7 @@ class BottomUpChartParser:
         if unknown_words:
             # TODO: Run fallback solutions to fix unknown words, else
             # raise exception
-            raise ParseException("Could not parse, due to the following unknown words: %s" % unknown_words)
+            raise ParseException("Sentence contains unknown words (%s). Please try again!" % ', '.join(unknown_words))
 
         ### Main steps ###
         # (1) Initialize empty chart and queue
@@ -98,7 +98,7 @@ class BottomUpChartParser:
         elif strategy == 'bestfirst':
             self.queue = BestFirstQueue()
         else:
-            raise QueueException('Could not create queue. Strategy must be "none" or "bestfirst".')
+            raise QueueException('Invalid strategy (%s). Please try again and choose a strategy from the following set: {none, bestfirst}' % strategy)
 
     def init_rule(self, tokens):
         '''
