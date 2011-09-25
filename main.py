@@ -19,7 +19,15 @@ class Main:
         print ';;;;;;;;;;;;;;;;;;;;;;;\n\n'
 
     def print_usage(self):
-        print 'Usage:\nThe program will prompt you for three things:\n\n(1) a sentence\n(2) the maximum number of parses you would like to see for it\n(3) the parsing strategy: {none,bestfirst}\n\nThe maximum number of parses defaults to 1. The parsing strategy defaults to bestfirst. If you are OK with the defaults, just press Enter without typing anything. If you want to exit the program, at any given point just type EXIT.\n\n'
+        print 'Usage:\
+        \nThe program will prompt you for three things:\
+        \n\n(1) a sentence\
+        \n(2) the maximum number of parses you would like to see for it\
+        \n(3) the parsing strategy: {none, bestfirst}\
+        \n\nThe maximum number of parses defaults to 1.\
+        \nThe parsing strategy defaults to bestfirst.\
+        \nIf you are OK with the defaults, just press Enter without typing anything.\
+        \nIf you want to exit the program, at any given point just type EXIT.\n\n'
 
     def initialize_parser(self):
         self.parser = BottomUpChartParser('sample.pcfg')
@@ -30,13 +38,12 @@ class Main:
         print '\n'
 
     def main(self):
-        interactive = True
-        while interactive:
+        while True:
             sentence = raw_input('Sentence: ')
             if sentence == 'EXIT':
                 print '\nGoodbye!\n'
                 break
-            number_of_parses = input('Number of parses: ')
+            number_of_parses = raw_input('Number of parses: ')
             if number_of_parses == 'EXIT':
                 print '\nGoodbye!\n'
                 break
@@ -44,8 +51,13 @@ class Main:
             if strategy == 'EXIT':
                 print '\nGoodbye!\n'
                 break
+
+            if number_of_parses == '':
+                number_of_parses = 1
+            if strategy == '':
+                strategy = 'bestfirst'
+
             self.parser.parse(sentence, number_of_parses, strategy)
-            interactive = False
 
 
 
