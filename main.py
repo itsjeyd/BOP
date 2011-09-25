@@ -2,6 +2,8 @@
 
 import sys
 from bottom_up_chart_parser import BottomUpChartParser
+from parse_exception import ParseException
+from queue_exception import QueueException
 
 class Main:
 
@@ -58,7 +60,13 @@ class Main:
             if strategy == '':
                 strategy = 'bestfirst'
 
-            self.parser.parse(sentence, number_of_parses, strategy)
+            try:
+                self.parser.parse(sentence, number_of_parses, strategy)
+            except ParseException as e:
+                print '\n' + e.value + '\n'
+                self.print_vocabulary()
+            except QueueException as e:
+                print '\n' + e.value + '\n'
 
 
 
