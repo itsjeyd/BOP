@@ -252,6 +252,14 @@ class ParseException:
         pass
 
 
+class QueueException:
+    def __init__(self, value):
+        pass
+
+    def __str__(self):
+        pass
+
+
 class Test(unittest.TestCase):
 
     def setUp(self):
@@ -261,4 +269,27 @@ class Test(unittest.TestCase):
         pass
 
     def test_parse_simple(self):
+        pass
+
+
+class Main:
+
+    parser = None
+
+    def __init__(self):
+        pass
+
+    def print_welcome(self):
+        pass
+
+    def print_usage(self):
+        pass
+
+    def initialize_parser(self):
+        pass
+
+    def print_vocabulary(self):
+        pass
+
+    def main(self):
         pass
