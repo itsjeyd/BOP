@@ -40,7 +40,7 @@ class Main:
         print ', '.join(self.parser.grammar.get_lexicon())
         print '\n'
 
-    def main(self):
+    def run(self):
         while True:
             sentence = raw_input('Sentence: ')
             if sentence == 'EXIT':
@@ -72,4 +72,4 @@ class Main:
 
 if __name__ == '__main__':
     main = Main()
-    main.main()
+    main.run()
