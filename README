@@ -1,15 +1,4 @@
-TODO -- always:
-- Update framework
-- COMMENT!
-- Refactor
-
-TODO -- next steps:
-- n-best strategy for queue (ALMOST THERE! :])
-
-QUESTIONS:
-- Where would we specify how many parses should be returned? Parameter for parse method? YES. This has already been incorporated in bottom_up_chart_parser.py.
-
-REMARKS:
-- Erster Satz des Kommentars sollte eine Kurzbeschreibung der Methode sein, deren Lektüre ausreicht, um einem grob klarzumachen, wofür eine Methode ist.
+TODO:
+Rename Main class (and file) to sth more descriptive!
 
 KNOWN BUGS:
