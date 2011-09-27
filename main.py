@@ -26,7 +26,7 @@ class Main:
         \n\n(1) a sentence\
         \n(2) the maximum number of parses you would like to see for it;\
         \n    if you want to see all possible parses, this should be -1\
-        \n(3) the parsing strategy: {none, bestfirst}\
+        \n(3) the parsing strategy: {fifo, bestfirst}\
         \n\nThe maximum number of parses defaults to 1.\
         \nThe parsing strategy defaults to bestfirst.\
         \nIf you are OK with the defaults, just press Enter without typing anything.\

@@ -93,12 +93,12 @@ class BottomUpChartParser:
         Initialize queue according to the parsing strategy chosen by
         the user
         '''
-        if strategy == 'none':
+        if strategy == 'fifo':
             self.queue = Queue()
         elif strategy == 'bestfirst':
             self.queue = BestFirstQueue()
         else:
-            raise QueueException('Invalid strategy (%s). Please try again and choose a strategy from the following set: {none, bestfirst}' % strategy)
+            raise QueueException('Invalid strategy (%s). Please try again and choose a strategy from the following set: {fifo, bestfirst}' % strategy)
 
     def init_rule(self, tokens):
         '''
