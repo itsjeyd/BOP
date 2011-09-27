@@ -5,7 +5,7 @@ from bottom_up_chart_parser import BottomUpChartParser
 from parse_exception import ParseException
 from queue_exception import QueueException
 
-class Main:
+class Bop:
 
     parser = None
 
@@ -71,5 +71,5 @@ class Main:
 
 
 if __name__ == '__main__':
-    main = Main()
-    main.run()
+    bop = Bop()
+    bop.run()
