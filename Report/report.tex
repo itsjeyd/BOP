@@ -45,15 +45,59 @@
 
 \title{Basic Algorithms}
 \subtitle{Project Report}
-\author{Tim Krones, Anna Schmidt and Marc Schulder}
+\author{Anna Schmidt, Tim Krones and Marc Schulder}
 \maketitle
 
 \section{Introduction}
 \label{sec:intro}
+As project work for the lecture \emph{Basic Algorithms for Computational Linguistics} our group implemented a probabilistic bottom-up chart parser called BOP using the Python programming language. The following report documents this work by describing the main components and algorithms of our system and giving instructions on how to run it. Additionally, it describes some ideas for an n-best parsing strategy.
 
 
-\section{Bottom-up Parser}
+\section{The Parser}
 \label{sec:basic}
+A bottom-up chart parser usually consists of two main components, namely a \emph{chart} and a \emph{queue}, which hold \emph{edges} representing words or constituents of sentences. In order to be able to successfully parse a sentence, the parser also needs a grammar and a parsing \emph{strategy} that determines in which order the edges are placed on the chart during the parsing process. In our system, each of these components is represented by a distinct class.
+
+The chart is represented by a two-dimensional array. The queue is simply a list of edges which is ordered according to the parsing strategy selected by the user.
+
+Edges are complex objects. They consist of a start and end point, a \emph{production rule}, and a \emph{dot}. For the production rule associated with a given edge, the dot marks which elements on its right-hand side (RHS) have already been found by the parser. If there are no RHS elements left to the right of the dot, the edge is said to be \emph{complete} or \emph{inactive}; if there are, it is considered \emph{incomplete} or \emph{active}.
+
+In addition to a particular production rule, every edge has an edge \emph{probability} associated with it. This probability is the product of the probability assigned to its production rule and the probabilities of all RHS elements \textbf{before} the dot, i.e. those that have already been found.
+
+Every edge also separately stores a list of these RHS elements. Without this, the system would not be a full-fledged parser but rather a recognizer: While it \textbf{would} be able to accept sentences which are licensed by a given grammar and reject those that are not, it would \textbf{not} be able to associate grammatical sentences with their underlying syntactic structure.
+
+In order to recover the tree structure associated with a particular parse, the parser needs to store the immediate substructure of each edge and use this information to "work its way down" from the S edge spanning the whole input sentence.
+
+The main functionality of a bottom-up chart parser is provided by three rules: Initialization Rule ("Init Rule" for short), Predict Rule and Fundamental Rule. These rules use the components described above to handle the parsing process.
+
+The Init Rule, which is run only once, starts the parsing process by generating complete edges for every single token of the input sentence and adding them to the queue. Since bottom-up parsers begin by operating on the word level, the edges representing the individual tokens must be put on the chart first. There are different ways of ensuring this behavior depending on the parsing strategy.
+
+The Predict Rule takes as input only complete edges. It consults the grammar and creates a new incomplete edge for every rule that has the LHS of the input edge as a first daughter on its RHS. All edges created by the Predict Rule are self-loop edges, since they are only predictions and have no substructures yet. Just like the Initialization Rule, the Predict Rule pushes each edge it creates to the queue.
+
+The Fundamental Rule is responsible for pairing incomplete edges with appropriate complete ones. It does so by first checking for each incomplete edge which complete edges directly follow it. If the element after the dot on the RHS of an incomplete edge matches the LHS of the production rule associated with a given complete edge, it creates a new edge - which can be complete or incomplete - with the dot advanced over the previously missing RHS element, and pushes it to the queue.
+
+After initializing the parsing process using the Init Rule, Predict Rule and Fundamental Rule are applied repeatedly until the maximum number of parses specified by the user has been found or the queue is empty. During the whole parsing process, the parser is not allowed to add the same edge to the chart or the queue twice. This restriction is necessary to enable the system to deal with left-recursive grammar rules; without it, the system would enter an infinite loop every time it has to make use of such a rule.
+
+The order in which edges are taken off the queue and placed on the chart during the parsing process is determined by the parsing strategy selected by the user. In our system, two different strategies can currently be used: A FIFO Strategy and a Best-First strategy.
+
+When using the FIFO Strategy, the ordering of edges on the queue simply results from the order in which they are pushed to it. In other words, the first element added to the queue is always the first one that is taken off the queue and put in the chart.
+
+When using the Best-First strategy, the queue is ordered with respect to the probabilities associated with the edges on the queue: The element on the queue with the highest probability always takes precedence over all the others during the parsing process. This guarantees that the first complete S edge spanning the whole sentence that the system finds is always the best (i.e., the most likely) parse for this sentence.
+
+
+\section{Running It}
+\label{sec:howto}
+In order to run the parser, all you need to do is
+
+\begin{enumerate}
+\item
+extract the archive
+\item
+cd into the extracted folder
+\item
+make sure the file bop.py is executable and run it by issuing python bop.py or ./bop.py
+\item
+follow the prompts
+\end{enumerate}
 
 
 \section{\XMas{} Parser Extension}
@@ -71,7 +115,7 @@ To give an example, imagine the best parse has an upper structure of S[NP(0:3) V
 Replacing the NP with a different NP that also spans nodes 0 through 3, but with a different sub-structure, allows the system to re-use the whole VP (which after all was the best for this span).
 
 Of course, the same can be done for all other sub-sections of the parse tree and only stops when no edge can be replaced by any other.
-%If no alternative sub-structures for both NP and VP can be found, their 
+%If no alternative sub-structures for both NP and VP can be found, their
 
 \subsection{Application}
 \label{sec:alt:app}
@@ -86,7 +130,7 @@ We also introduce a new queue strategy that allows special manipulations through
 We will first define the new queue to establish its functionality, followed by a description of \xmas{} rule, which explains the purpose of the new functions.
 
 \subsubsection{\XMas{} Queue}
-The new queue does in fact consist of two sub-queues, the base queue and the priority queue. 
+The new queue does in fact consist of two sub-queues, the base queue and the priority queue.
 %The first sub-queue functions like the normal queue, while the second is a priority queue
 Both are sorted by likelihood, just like the queue of the \textit{best first} strategy.
 
@@ -103,7 +147,7 @@ In the main algorithm, the new \xmas{} rule is called right after the predict an
 Its first action is to activate the priority queue. This ensures that all edges added through the \xmas{} will be processed before those remaining from the conventional parsing process.
 
 %The \xmas{} rule directly activates the priority queue.
-%It then attempts to take any further complete parses from the queue through 
+%It then attempts to take any further complete parses from the queue through
 It then requests a further complete parse from the base queue via particular-pop%
 \footnote{This step is optional. We have included it as it is a quick way of finding further parses that are still stuck in the queue. It does not directly belong to our agenda of finding alternate sub-trees. It can be skipped by moving from line \ref{alg:alt:rule:activate}  of algorithm \ref{alg:alt:rule} directly to line \ref{alg:alt:rule:s-dtrs}.\label{foot:optional}}
 (which ignores the priority queue activation).
@@ -123,7 +167,7 @@ If no alternative sub-trees can be found for any of the parses, the rule ends wi
 \paragraph{Sub-tree search}
 Let us now look at what happens during the search for sub-tree alternatives of a parse.
 %The parse tree is searched, breadth-first, for edges that can directly replace an edge in the tree. For this, they must
-%with the same left hand side, starting node and end node as the daughter elements of the 
+%with the same left hand side, starting node and end node as the daughter elements of the
 Starting with the direct daughters of the parse's root edge, the tree is searched breadth-first.
 %\footnote{A descending breadth-first search might actually prove detrimental to our goal of finding the n-best parse, as it favours }.
 For each daughter, it is checked whether the base queue contains alternative complete edges with the same left hand side, starting node and end node as the daughter. The resulting list contains all known alternative edges for all daughters at the current tree depth.
@@ -186,9 +230,9 @@ For the sake of simplicity and to avoid logical pitfalls, we have omitted a spec
         \STATE \texttt{Predict rule(edge)}
     \ENDIF
     \STATE \texttt{Fundamental rule(edge)}
-    
+
     \IF{edge is complete parse \OR edge was last priority queue element}
-        \STATE \texttt{\XMas{} rule()}    
+        \STATE \texttt{\XMas{} rule()}
     \ENDIF
 \ENDWHILE  \label{alg:alt:parse:end}
 \RETURN found parses
@@ -214,18 +258,18 @@ For the sake of simplicity and to avoid logical pitfalls, we have omitted a spec
             \IF[Abort condition]{priority queue is not empty}
                 \STATE Terminate rule
             \ENDIF
-        
+
             \FOR[Breadth-first search of  tree]{each edge in \texttt{mthrs} list}
                 \STATE Append all daughters of edge to \texttt{dtrs} list
             \ENDFOR
-            
+
             \FOR[Process current tree depth]{each daughter edge in \texttt{dtrs} list}
                 \REPEAT
                     \STATE Particular-pop edge with same start, end and LHS as daughter
                     \STATE Push new edge to priority queue    \COMMENT{Skipped if no edge returned}
                 \UNTIL{no edge is returned by particular-pop}
             \ENDFOR
-            
+
             \STATE Copy content of \texttt{dtrs} list to \texttt{mthrs} list
             \STATE Empty \texttt{dtrs} list
         \ENDWHILE
