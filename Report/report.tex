@@ -1,0 +1,273 @@
+%\ProvidesPackage{mystyle}
+
+%% Document setup
+\documentclass[11pt, titlepage, a4paper]{scrartcl}		%Weitere Optionen: twoside, twopage, twocolumn
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\pagestyle{headings}
+
+%% Fonts and formating
+\usepackage{latexsym}
+\usepackage{amsmath, amssymb}
+\usepackage{fixltx2e}
+\usepackage{ stmaryrd }
+%\usepackage{algpseudocode, algorithm}
+\usepackage{algorithmic, algorithm}
+
+%% Colour
+\usepackage{color}
+\definecolor{red}{rgb}{1,0,0}
+\definecolor{green}{rgb}{0,0.5,0}
+\definecolor{blue}{rgb}{0,0,1}
+\definecolor{highlight}{rgb}{0,1,1}
+
+%% Misc packages
+\usepackage{graphicx}
+\usepackage{nameref}
+
+
+%% Always add hyperref last
+\usepackage{url} % use url as a hyperref replacement to make \url{} command work.
+%\usepackage{hyperref}
+
+\usepackage{eqparbox}
+\renewcommand{\algorithmiccomment}[1]{\hfill\eqparbox{COMMENT}{\textit{\# #1}}}
+
+\newcommand{\tab}{\hspace*{2em}}
+\newcommand{\xmas}[1]{alt-search#1}
+\newcommand{\XMas}[1]{Alt-Search#1}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\cov}{cov}
+\DeclareMathOperator*{\sequence}{Sequence}
+
+\begin{document}
+
+\title{Basic Algorithms}
+\subtitle{Project Report}
+\author{Tim Krones, Anna Schmidt and Marc Schulder}
+\maketitle
+
+\section{Introduction}
+\label{sec:intro}
+
+
+\section{Bottom-up Parser}
+\label{sec:basic}
+
+
+\section{\XMas{} Parser Extension}
+\label{sec:alt}
+The parser presented in section \ref{sec:basic} is capable of two things: Finding the best parse and finding a given number of parses. However, it is not given that the second parse found is also the second-best parse, neither the third found the third-best, etc. Such an n-best parse usually requires the computation and subsequent ranking of all parses.
+This is computationally expensive. To avoid it, we suggest an extension to the parser that will allow it to find, if not the n-best parses, at least a good approximation of them, while hopefully speeding up the parsing process.
+
+\subsection{Theory}
+\label{sec:alt:theory}
+The base assumption of our extension, which we dub \textit{\xmas{} parsing} is that the second-best parse will probably have a similar base structure to the best parse and only differ in a bit of its sub-structure.
+Thus, after a best parse is found, the system should prioritize edges that can directly replace edges of the best parse while re-using the rest of its sub-structure.
+
+To give an example, imagine the best parse has an upper structure of S[NP(0:3) VP(3:8)]
+%(i.e. the NP goes from nodes 0 to 3 and the VP from 3 till 8).
+Replacing the NP with a different NP that also spans nodes 0 through 3, but with a different sub-structure, allows the system to re-use the whole VP (which after all was the best for this span).
+
+Of course, the same can be done for all other sub-sections of the parse tree and only stops when no edge can be replaced by any other.
+%If no alternative sub-structures for both NP and VP can be found, their 
+
+\subsection{Application}
+\label{sec:alt:app}
+We now present a first tentative approach to implementing this theory.
+It represents a compromise between our two goals of increasing speed and quality of the parsing process, while trying to preserve the relative simplicity of chart parsing.
+
+%To this end, we introduce a new \xmas{} rule to be called by the main module as well as a new queue that allows special manipulations through the new rule.
+%Complete algorithms of the main module and the new rule can be found in the appendix. For an implementation of the queue, refer to the source code.
+To this end, we expand the main algorithm to call an additional \xmas{} rule (see algorithms \ref{alg:alt} and \ref{alg:alt:rule} in the appendix).
+We also introduce a new queue strategy that allows special manipulations through the new rule.
+
+We will first define the new queue to establish its functionality, followed by a description of \xmas{} rule, which explains the purpose of the new functions.
+
+\subsubsection{\XMas{} Queue}
+The new queue does in fact consist of two sub-queues, the base queue and the priority queue. 
+%The first sub-queue functions like the normal queue, while the second is a priority queue
+Both are sorted by likelihood, just like the queue of the \textit{best first} strategy.
+
+At first, the base queue is accessed normally, until the priority queue is activated by the \xmas{} rule (see below). From then on, all standard requests (e.g. push and pop actions) are redirected to the priority queue. When the priority queue is emptied, the queue automatically switches back to the base queue.
+
+The second addition to the \xmas{} queue is the particular-pop command. It allows the specification of a left hand side, starting node and end node of the edge that will be popped from the queue\footnote{To allow a fast search of the queues via particular-pop, we have introduced a secondary data structure which allows directed access via the given parameters. The downside of this is that we need to maintain this secondary structure throughout the normal parsing process as well.}.
+Additionally, the edge in question must be complete (i.e. its dot is at the right end of the rule).
+Note also that particular-pop always accesses the base queue, while the normal pop command accesses either base or priority queue, depending on which is activated.
+
+The new queue is considered empty when both its sub-queues are empty. It is also possible to check whether the priority queue is empty.
+
+\subsubsection{\XMas{} Rule}
+In the main algorithm, the new \xmas{} rule is called right after the predict and fundamental rules, but only if the most recent addition to the chart is a complete s-edge that spans the whole sentence (i.e. is a complete parse).
+Its first action is to activate the priority queue. This ensures that all edges added through the \xmas{} will be processed before those remaining from the conventional parsing process.
+
+%The \xmas{} rule directly activates the priority queue.
+%It then attempts to take any further complete parses from the queue through 
+It then requests a further complete parse from the base queue via particular-pop%
+\footnote{This step is optional. We have included it as it is a quick way of finding further parses that are still stuck in the queue. It does not directly belong to our agenda of finding alternate sub-trees. It can be skipped by moving from line \ref{alg:alt:rule:activate}  of algorithm \ref{alg:alt:rule} directly to line \ref{alg:alt:rule:s-dtrs}.\label{foot:optional}}
+(which ignores the priority queue activation).
+If one is returned, it is pushed to the priority queue and the rule terminates.
+During the next iteration of the main parsing loop (lines \ref{alg:alt:parse:start}--\ref{alg:alt:parse:end} in algorithm \ref{alg:alt}), it is then popped from the (otherwise empty) queue and processed by the normal rules. Thereafter, the \xmas{} rule is invoked again, as the newest edge on the chart is once more a complete parse.
+
+This process is repeated until no more complete parses remain on the queue.
+In that case, the \xmas{} rule moves on to its main part, the search for alternative sub-trees.
+This search is repeated for all complete parses in the chart, starting with the most likely one.
+
+If at least one alternative is found for a parse, the search is stopped and the remaining parses are not checked.
+The rule is existed and the alternative parses are generated by processing the priority queue in the main loop.
+Afterwards, the \xmas{} rule is re-entered and the search begins anew.
+
+If no alternative sub-trees can be found for any of the parses, the rule ends without filling the priority queue, causing the system to move back to the base queue at the next iteration and continue normal parsing until yet another complete parse is found.
+
+\paragraph{Sub-tree search}
+Let us now look at what happens during the search for sub-tree alternatives of a parse.
+%The parse tree is searched, breadth-first, for edges that can directly replace an edge in the tree. For this, they must
+%with the same left hand side, starting node and end node as the daughter elements of the 
+Starting with the direct daughters of the parse's root edge, the tree is searched breadth-first.
+%\footnote{A descending breadth-first search might actually prove detrimental to our goal of finding the n-best parse, as it favours }.
+For each daughter, it is checked whether the base queue contains alternative complete edges with the same left hand side, starting node and end node as the daughter. The resulting list contains all known alternative edges for all daughters at the current tree depth.
+If any alternative edges are found, the search is stopped at this point, the found edges are pushed to the priority queue and the \xmas{} rule terminates.
+
+If no alternatives could be found, the search depth is increased by one, meaning that the current daughter's own direct daughters are checked for alternatives. This is repeated until either some alternatives are found or the leaf level is reached, at which point the search moves on to the next complete parse tree until all trees are searched and \xmas{} is completed.
+
+\section{Conclusions}
+We have presented a bottom-up parser with two conventional parsing strategies(\textit{first-in first-out} and \textit{best first}) as well as an experimental extension. We accompanied this with a complete implementation in Python.
+
+In chapter \ref{sec:basic} we described the bottom-up parser's structure and given instructions for the implementation's use. In chapter \ref{sec:alt} we have introduced its extension, the \textit{\xmas{} parser}, which prioritizes parses with a structure similar to the first found (and best) parse.
+
+\subsection{Future Work}
+Due to time constraints, the \xmas{} parser could not be extensively tested or its efficiency be shown computationally or mathematically. Several trade-offs remain where we are uncertain which approach would be favourable. Generally we have chosen in favor of fast parse generation (see footnote \ref{foot:optional}) and search (breadth-first instead of computing all potential sub-trees) rather than trying to ascertain that the next parse will definitely be the best one.
+
+One point were we might even still improve on speed is the search of all complete parses. Right now, the best parses are always searched before worse ones, no matter whether the queue can still potentially contain alternative sub-trees for them or not.
+%In particular cases it could be possible, that this can be avoided, e.g. when no alternative sub-tree was found for a parse in a previous iteration and only the priority queue was in use since then. This would mean that all new edges since then could not be compatible with the new edge
+For the sake of simplicity and to avoid logical pitfalls, we have omitted a special treatment of this, but adding it to the implementation would be fairly simple.
+
+\appendix
+\clearpage
+\section{Appendix}
+
+\begin{algorithm}
+\caption{Basic Bottom-Up Parsing Algorithm}
+\label{alg:basic}
+\begin{algorithmic}[1]
+\STATE Tokenize sentence
+\STATE Check for unknown tokens
+\STATE Initialize chart and queue
+\FOR{each token}
+    \STATE \texttt{Initialization rule(token)}
+\ENDFOR
+\WHILE{queue is not empty \AND not enough parses found} \label{alg:basic:parse:start}
+    \STATE Pop next edge from queue
+    \STATE Add edge to chart
+    \IF{edge is complete}
+        \STATE \texttt{Predict rule(edge)}
+    \ENDIF
+    \STATE \texttt{Fundamental rule(edge)}
+\ENDWHILE  \label{alg:basic:parse:end}
+\RETURN found parses
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{Bottom-Up Parsing Algorithm with \XMas{} Extension}
+\label{alg:alt}
+\begin{algorithmic}[1]
+\STATE Tokenize sentence
+\STATE Check for unknown tokens
+\STATE Initialize chart and queue
+\FOR{each token}
+    \STATE \texttt{Initialization rule(token)}
+\ENDFOR
+\WHILE{queue is not empty \AND not enough parses found} \label{alg:alt:parse:start}
+    \STATE Pop next edge from queue
+    \STATE Add edge to chart
+    \IF{edge is complete}
+        \STATE \texttt{Predict rule(edge)}
+    \ENDIF
+    \STATE \texttt{Fundamental rule(edge)}
+    
+    \IF{edge is complete parse \OR edge was last priority queue element}
+        \STATE \texttt{\XMas{} rule()}    
+    \ENDIF
+\ENDWHILE  \label{alg:alt:parse:end}
+\RETURN found parses
+\end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}
+\caption{\XMas{} Rule}
+\label{alg:alt:rule}
+\begin{algorithmic}[1]
+\REQUIRE Empty lists: \texttt{dtrs}, \texttt{mthrs}
+\STATE Activate priority queue \label{alg:alt:rule:activate}
+%\STATE Pop next complete parse of the sentence \COMMENT{via particular-pop} \label{alg:alt:rule:altparse:start}
+\STATE Particular-pop next complete parse of the sentence \COMMENT{Search complete parses} \label{alg:alt:rule:altparse:start}
+\IF{a complete parse was popped}
+    \STATE push complete parse to priority queue  \label{alg:alt:rule:altparse:end}
+\ELSE[Search alternative sub-trees]
+    \STATE Get list of complete parses from chart  \label{alg:alt:rule:s-dtrs}
+    \STATE Sort list of parses by decreasing likelihood
+    \FOR{each parse in list of parses}
+        \STATE Add parse to \texttt{mthrs} list
+        \WHILE{\texttt{mthrs} list is not empty}
+            \IF[Abort condition]{priority queue is not empty}
+                \STATE Terminate rule
+            \ENDIF
+        
+            \FOR[Breadth-first search of  tree]{each edge in \texttt{mthrs} list}
+                \STATE Append all daughters of edge to \texttt{dtrs} list
+            \ENDFOR
+            
+            \FOR[Process current tree depth]{each daughter edge in \texttt{dtrs} list}
+                \REPEAT
+                    \STATE Particular-pop edge with same start, end and LHS as daughter
+                    \STATE Push new edge to priority queue    \COMMENT{Skipped if no edge returned}
+                \UNTIL{no edge is returned by particular-pop}
+            \ENDFOR
+            
+            \STATE Copy content of \texttt{dtrs} list to \texttt{mthrs} list
+            \STATE Empty \texttt{dtrs} list
+        \ENDWHILE
+    \ENDFOR
+\ENDIF
+\end{algorithmic}
+\end{algorithm}
+
+%\begin{algorithm}
+%\caption{\Xmas{} rule}
+%\label{alg:alt:rule}
+%\begin{algorithmic}[1]
+%\REQUIRE Empty lists: \texttt{dtrs}, \texttt{mthrs}
+%\STATE Activate priority queue \label{alg:alt:rule:activate}
+%%\STATE Pop next complete parse of the sentence \COMMENT{via particular-pop} \label{alg:alt:rule:altparse:start}
+%\STATE Particular-pop next complete parse of the sentence \label{alg:alt:rule:altparse:start}
+%\IF{a complete parse was popped}
+%    \STATE push complete parse to priority queue  \label{alg:alt:rule:altparse:end}
+%\ELSE
+%    \STATE Get list of complete parses from chart  \label{alg:alt:rule:s-dtrs}
+%    \STATE Sort list of parses by decreasing likelihood
+%    \WHILE{list of parses is not empty \AND priority queue is empty}
+%        \STATE Pop parse from list
+%        \STATE Append direct daughters of parse to \texttt{dtrs} list
+%        \WHILE{\texttt{dtrs} is not empty}
+%            \FOR{each daughter edge in \texttt{dtrs} list}
+%                \REPEAT
+%                    \STATE Particular-pop edge with same start, end and LHS as daughter
+%                    \STATE Push new edge to priority queue    \COMMENT{skipped when no edge is returned}
+%                \UNTIL{no edge is returned by particular-pop}
+%            \ENDFOR
+%            \IF{priority queue is empty}
+%                \STATE Copy content of \texttt{dtrs} list to \texttt{mthrs} list
+%                \STATE Empty \texttt{dtrs} list
+%                \FOR{each edge in \texttt{mthrs} list}
+%                    \STATE Append all daughters of edge to \texttt{dtrs} list
+%                \ENDFOR
+%            \ENDIF
+%        \ENDWHILE
+%    \ENDWHILE
+%\ENDIF
+%\end{algorithmic}
+%\end{algorithm}
+
+\end{document}
