@@ -6,7 +6,7 @@
 \usepackage[english]{babel}
 \pagestyle{headings}
 
-%% Fonts and formating
+%% Fonts and formatting
 \usepackage{latexsym}
 \usepackage{amsmath, amssymb}
 \usepackage{fixltx2e}
@@ -43,7 +43,7 @@
 
 \begin{document}
 
-\title{Basic Algorithms}
+\title{Basic Algorithms for Computational Linguistics}
 \subtitle{Project Report}
 \author{Anna Schmidt, Tim Krones and Marc Schulder}
 \maketitle
@@ -183,7 +183,7 @@ In chapter \ref{sec:basic} we described the bottom-up parser's structure and giv
 \subsection{Future Work}
 Due to time constraints, the \xmas{} parser could not be extensively tested or its efficiency be shown computationally or mathematically. Several trade-offs remain where we are uncertain which approach would be favourable. Generally we have chosen in favor of fast parse generation (see footnote \ref{foot:optional}) and search (breadth-first instead of computing all potential sub-trees) rather than trying to ascertain that the next parse will definitely be the best one.
 
-One point were we might even still improve on speed is the search of all complete parses. Right now, the best parses are always searched before worse ones, no matter whether the queue can still potentially contain alternative sub-trees for them or not.
+One point where we might even still improve on speed is the search of all complete parses. Right now, the best parses are always searched before worse ones, no matter whether the queue can still potentially contain alternative sub-trees for them or not.
 %In particular cases it could be possible, that this can be avoided, e.g. when no alternative sub-tree was found for a parse in a previous iteration and only the priority queue was in use since then. This would mean that all new edges since then could not be compatible with the new edge
 For the sake of simplicity and to avoid logical pitfalls, we have omitted a special treatment of this, but adding it to the implementation would be fairly simple.
 
