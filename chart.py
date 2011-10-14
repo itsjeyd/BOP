@@ -7,9 +7,9 @@ class Chart:
     chart = None
     size = 0
 
-    def __init__(self, size):
-        self.chart = [[[] for col in range(size)] for row in range(size)]
-        self.size = size
+    def __init__(self, sentence_length):
+        self.size = sentence_length+1
+        self.chart = [[[] for col in range(self.size)] for row in range(self.size)]
 
     def get_size(self):
         '''

@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
 from chart import Chart
-from queue import Queue, BestFirstQueue
+from queue import Queue, BestFirstQueue, AltSearchQueue
 from edge import Edge
 from production_rule import ProductionRule
 from grammar import Grammar
 from parse_exception import ParseException
+from queue_exception import QueueException
+from bisect import bisect
 
 class BottomUpChartParser:
 
@@ -14,11 +16,13 @@ class BottomUpChartParser:
     queue = None    # Queue object on which new edges are stacked
     chart = None    # Chart object in which edges are stored for the
                     # final parse generation
+    sentence_length = 0
+    will_print_chart = True # Set to false if you want to deactivate printing of the found parses
 
     def __init__(self, grammar):
         self.grammar = Grammar(grammar)
 
-    def parse(self, sentence, number_of_parses=1, strategy='bestfirst'):
+    def parse(self, sentence, number_of_parses, strategy):
         '''
         Parse the input sentence
 
@@ -27,30 +31,31 @@ class BottomUpChartParser:
         ### Preprocessing ###
         # Tokenize input sentence
         tokens = self.tokenize(sentence)
+        self.sentence_length = len(tokens)
 
         # Check for unknown tokens
         unknown_words = self.get_unknown_words(tokens)
         if unknown_words:
             # TODO: Run fallback solutions to fix unknown words, else
             # raise exception
-            raise ParseException("Could not parse, due to the following unknown words: %s" % unknown_words)
+            raise ParseException("Sentence contains unknown words (%s). Please try again!" % ', '.join(unknown_words))
 
         ### Main steps ###
         # (1) Initialize empty chart and queue
-        self.initialize_chart(tokens)
+        self.initialize_chart()
         self.initialize_queue(strategy)
 
         # (2) For every token, create a complete edge and push it to
         #     the queue
         self.init_rule(tokens)
 
+        # Iteration counter for evaluation purposes
+        iters = 0
+
         # (3) Repeat until no more edges are added
         #     or sufficient number of parses has been found:
         while not self.queue.is_empty() and not self.enough_parses_found(number_of_parses):
-            ''' If strategy==xmas and new complete s-edge (0:sentence_length) was found
-                   xmas_parse(s-edge)
-                else (all the rest)'''
-            
+            iters = iters + 1
             # (3.1) Add next element on queue to the chart
             edge = self.queue.get_next_edge()
             self.chart.add_edge(edge)
@@ -64,98 +69,28 @@ class BottomUpChartParser:
 
             self.fundamental_rule(edge)
 
+            # (3.3) For alt search strategy, run search rule
+            #       if input edge is a complete parse
+            #       or last element of priority queue
+            if strategy == 'altsearch':
+                if ( ( (not self.queue.is_priority_active()) # Case 1: Complete parse was added to chart
+                  and edge.get_prod_rule().get_lhs() == 'S'
+                  and edge.is_complete()
+                  and edge.get_start() == 0
+                  and edge.get_end() == self.sentence_length )
+                  or (self.queue.is_priority_active()        # Case 2: Priority queue emptied
+                      and self.queue.is_priority_empty() ) ):
+                        self.search_rule(edge)
+
         # 4) Display generated parses
-        print '========================='
-        self.display_parses()
-        print '========================='
-    
-#    def xmas_parse(self, s_edge):
-#        daughters = s_edge.get_known_dtrs()
-#        candidates = []
-#        for daughter in daughters:
-#            new_candidate = queue.
-        ''' WARNING! BULLSHIT!
-        collect candidates
-                candidate is edge(lhs,i,j) like daughter of s-edge 
-                candidate comes from chart or queue
-                if from chart:
-                    candidate must not be daughter of other s?
-                
-                 '''
-        ''' WARNING! BULLSHIT!
-        max_prob = 
-        for s-edge in s-edges:
-            daughter-tuple for each s-edge
-            candidates = {}
-            for each daughter:
-                dtr_candidates = []
-                dtr_candidates.add(candidates in chart)
-                dtr_candidates.add(candidates in queue)
-                best_candidate = max(dtr_candidates)
-                candidates.put(daughter, best_candidate)
-        for c1 in candidates:
-            for c2 in candidates:
-                if c1.end == c2.start
-                    and c1.start == 
-        '''
-        
-    ''' GOOD STUFF! '''
-    def xmas_parse(self, s_edge):
-        new_s_edge = self.xmas_recurse(s_edge)
-        self.xmas_cleanup(new_s_edge)
-        
-    def xmas_recurse(self, root_edge):
-        dtrs = root_edge.get_known_dtrs()
-        candidates = []
-        combinations = []
-        
-        for dtr in dtrs:
-            #get best candidate
-            candidate = None
-            ''' TODO: Determine best candidate '''
-            candidates.append(candidate)
-        
-        if len(candidates) == 0:
-            for dtr in dtrs:
-                child_candidate = self.xmas_recurse(dtr)
-                ''' TODO: What list add function do we require?
-                    Do we get a list of candidates or just a single one?
-                '''
-                candidates.append(child_candidate)
-        
-        for pos in range(len(dtrs)):
-            dtrs_copy = dtrs[:]
-            dtrs_copy = []
-            ''' TODO: I believe we might run into trouble here, 
-                if e.g. there was no candidate for the first dtr element,
-                but one for the second.
-                A workaround would be to use filler elements (can you add
-                None to a list?), although we then have to add appropriate
-                checks for them here and for the child candidate case. '''
-            dtrs_copy[pos] = candidates[pos]
-            combinations.append(dtrs_copy)
-        ''' TODO: throw out combinations that are used as 
-            edge(root_edge lhs, combination rhs) already
-        '''
-        ''' TODO: best combination = max arg for prob(combinations) '''
-        max_combination = None
-        
-        start = root_edge.get_start()
-        end = root_edge.get_end()
-        prod_rule = root_edge.get_prod_rule()
-        dot = root_edge.get_dot()
-        known_dtrs = max_combination
-        new_edge = Edge(start, end, prod_rule, dot, known_dtrs)
-        return new_edge
-        pass
-        
-    def xmas_cleanup(self, new_edge):
-        if not self.chart.has_edge(new_edge):
-            self.chart.add_edge(new_edge)
-            ''' TODO: if new_edge in queue, remove from queue '''
-            for dtr in new_edge.get_known_dtrs():
-                self.xmas_cleanup(dtr)
-    
+        s_edges = self.chart.get_s_edges()
+        print '%s parses found after %s iterations:' % (len(s_edges),iters)
+        if self.will_print_chart :
+            self.display_parses()
+        else:
+            for s_edge in s_edges:
+                print 'Found s-edge: %s' % s_edge
+
     def tokenize(self, sentence):
         '''
         Separate a sentence into a list of tokens and return the list.
@@ -173,24 +108,26 @@ class BottomUpChartParser:
         unknown_words = [token for token in tokens if token not in lexicon]
         return unknown_words
 
-    def initialize_chart(self, tokens):
+    def initialize_chart(self):
         '''
-        Initialize chart of size tokens + 1
+        Initialize chart
+        Size of chart will be sentence_length+1 in both dimensions
         '''
-        n = len(tokens)
-        self.chart = Chart(n+1)
+        self.chart = Chart(self.sentence_length)
 
     def initialize_queue(self, strategy):
         '''
         Initialize queue according to the parsing strategy chosen by
         the user
         '''
-        if strategy == 'none':
+        if strategy == 'fifo':
             self.queue = Queue()
         elif strategy == 'bestfirst':
             self.queue = BestFirstQueue()
+        elif strategy == 'altsearch':
+            self.queue = AltSearchQueue(self.sentence_length+1)
         else:
-            pass
+            raise QueueException('Invalid strategy (%s). Please try again and choose a strategy from the following set: {fifo, bestfirst, altsearch}' % strategy)
 
     def init_rule(self, tokens):
         '''
@@ -216,7 +153,7 @@ class BottomUpChartParser:
         contains is >= the number of parses that the user wants, else
         False
         '''
-        return True if len(self.chart.get_s_edges()) >= number_of_parses else False
+        return False if (number_of_parses == -1 or len(self.chart.get_s_edges()) < number_of_parses) else True
 
     def predict_rule(self, complete_edge):
         '''
@@ -239,8 +176,6 @@ class BottomUpChartParser:
         for parent_rule in parent_rules:
             new_edge = Edge(start, start, parent_rule, 0, [])
             if not self.queue.has_edge(new_edge) and not self.chart.has_edge(new_edge):
-                print "Predict rule: [%s] + [%s] = [%s]" \
-                      % (complete_edge, parent_rule, new_edge)
                 self.queue.add_edge(new_edge)
 
     def fundamental_rule(self, input_edge):
@@ -314,15 +249,57 @@ class BottomUpChartParser:
 
                     # Add new edge to queue
                     if not self.queue.has_edge(new_edge) and not self.chart.has_edge(new_edge):
-                        print "Fundamental rule: [%s] + [%s] = [%s]" \
-                              % (incomp_edge, comp_edge, new_edge)
                         self.queue.add_edge(new_edge)
+
+    def search_rule(self, s_edge):
+        'Scans queue for priority edges. See project report for detailed explanation'
+        self.queue.activate_priority_queue()
+        # Check for further complete s-edges on queue
+        new_s_edge = self.queue.get_next_particular_edge('S', 0, self.sentence_length)
+        if not new_s_edge == None:  # Further s-edge was found
+            self.queue.add_edge(new_s_edge)
+        else:                       # No further s-edge remained on queue
+            s_edges = self.chart.get_s_edges()
+            # Sort s-edges by likelihood
+            sorted_edges = []
+            for s_edge in s_edges:
+                pos = bisect([edge.get_prob() for edge in sorted_edges], s_edge)
+                sorted_edges.insert(pos, s_edge)
+
+            # Check s-edges until alternative parses are found
+            while len(s_edges) > 0 and self.queue.is_empty:
+                s_edge = s_edges.pop()
+                dtrs = s_edge.get_known_dtrs()
+                # Iterate through depths until alternatives are found
+                # or tree is exhausted
+                while len(dtrs) > 0:
+#                    print "---"
+                    for dtr in dtrs:
+                        lhs = dtr.get_prod_rule().get_lhs()
+                        start = dtr.get_start()
+                        end = dtr.get_end()
+                        alt_dtr = self.queue.get_next_particular_edge(lhs, start, end)
+                        while not alt_dtr == None:
+                            self.queue.add_edge(alt_dtr)
+                            alt_dtr  = self.queue.get_next_particular_edge(lhs, start, end)
+                    if self.queue.is_empty:
+                        # If no alt edge was found on this level,
+                        # check all elements of next lower level.
+                        for dtr in dtrs:
+                            mthrs = dtrs
+                            dtrs = []
+                            for mthr in mthrs:
+                                dtrs.extend(mthr.get_known_dtrs())
 
     def display_parses(self):
         '''
         Display parse trees for all successful parses
         '''
         s_edges = self.chart.get_s_edges()
+
+        if len(s_edges) == 0:
+            raise ParseException("No parse could be found.")
+
         for s_edge in s_edges:
             parse_string = self.build_parse_string_from_edge(s_edge, 'S')
             print self.add_indentation_to_parse_string(parse_string) + '\t' + str(s_edge.get_prob())
